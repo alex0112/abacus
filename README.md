@@ -31,3 +31,14 @@ BasicML vocabulary defined as follows:
 - `HALT = 43` Stop the program
 
 The last two digits of a BasicML instruction are the operand – the address of the memory location containing the word to which the operation applies.
+
+## Proposed Architecture:
+
+- `basm.py` => an assembler that takes valid BasicML program and turns it into CPU instructions for the VM (proposing `.bml` and `.basm` as the respective file extensions)
+- `main.py` => Instantiates a virtual machine and loads an assembled `.basm` program into it.
+
+#### Modules:
+
+- `src/uvsim.py` => An abstraction representing the virtual machine (Composes the CPU and Memory into itself)
+- `src/cpu.py` => An abstraction represting the CPU (including its accumulator/register)
+- `src/memory.py` => An abstraction representing the memory of the VM
