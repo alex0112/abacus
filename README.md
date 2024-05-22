@@ -1,4 +1,4 @@
-# Abacus - A BasicML interpreter
+# Abacus - A UVSim Virtual Machine and Assembler
 
 The UVSim is a simple virtual machine, but powerful. The UVSim can only interpret a machine language called BasicML.
 
