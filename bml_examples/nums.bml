@@ -1,0 +1,8 @@
+;; Prints numbers in an infinite loop
+
+00 0001      ;; => Becomes 0001
+01 0000      ;; => Becomes 0000
+02 WRITE 01  ;; => Becomes 1101
+03 ADD 00    ;; =>         3000
+04 STORE 01  ;; =>         2101
+05 BRANCH 02 ;; =>         4002
