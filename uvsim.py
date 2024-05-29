@@ -1,43 +1,54 @@
 #!/usr/bin/env python3
 
-#####################################################
-# Main Module for "Abacus". A UVSim Virtual Machine #
-#                                                   #
-# Authors:                                          #
-# Kainny Godinez                                    #
-# Jackson Jacobson                                  #
-# Alex Larsen                                       #
-# Scott Mottola                                     #
-# Jordan Paxman                                     #
-#####################################################
+import CPU
+import Memory
+import IODevice
 
-from sys import argv
-
-def main():
+class UVSim:
     """
-    Main function. Starts the simulator and executes a program.
+    An abstraction representing the UVSim virtual machine. It represents the current state of the virtual machine and creates its memory, register, and CPU.
     """
-    banner()
+    def __init__():
+        """
+        Initialize and create a UVSim VM
+        """
+        self.__memory = Memory.new()
+        self.__io  = IODevice.new()
+        self.__cpu = CPU.new()
 
-    if len(argv) != 2:
-        print("Please specify a compiled program to execute")
-        exit(1)
-    pass
+    @property
+    def mem(self):
+        return self.__memory
 
-def banner():
-    """
-    Be fancy. Because why not?
-    """
-    banner = """
-  _    _  __      __   _____   _             
- | |  | | \ \    / /  / ____| (_)            
- | |  | |  \ \  / /  | (___    _   _ __ ___  
- | |  | |   \ \/ /    \___ \  | | | '_ ` _ \ 
- | |__| |    \  /     ____) | | | | | | | | |
-  \____/      \/     |_____/  |_| |_| |_| |_|
-    """
+    @property
+    def cpu(self):
+        return self.__cpu
 
-    print(banner)
+    @property
+    def io_device:
+        return self.__io
 
-if __name__ == '__main__':
-    main()
+    def load(self, filename):
+        """
+        Given a filename load its contents into memory starting at location `00`
+        """
+        with open(filename) as program:
+            if len(program) > 100:
+                pass ## TODO: We need to define behavior for when a program exceeds the available memory
+
+            for opcode in program:
+                self.mem.writenext(opcode)
+
+    def execute(self):
+        """
+        Walk through the contents of memory and hand each instruction to the CPU
+        """
+        if len(self.mem) == 0:
+            pass ## TODO: define this behavior
+        else:
+            for raw_num in self.mem:
+                opcode = Opcode.new(raw_num) ## see opcode.py
+
+                self.cpu.process(opcode, self.mem, self.io_device)
+
+        
