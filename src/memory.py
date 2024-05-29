@@ -7,7 +7,7 @@ class Memory:
 
     def __init__():
         """
-        Create a new CPU for a UVSim virtual machine.
+        Create a new memory array for a UVSim virtual machine.
         """
         self.__mem = []
 
@@ -18,10 +18,22 @@ class Memory:
         """
         return self.__mem
 
-    @mem.setter
-    def mem(self, val):
+    def write(self, value, address):
         """
-        Update the memory
-        """
-        self.__mem = vale
+        Set the value (should be a signed opcode/number) at a specific index.
 
+        If the memory has not yet been allocated, create it.
+        """
+        pass ## TODO write me
+
+    @property
+    def __next(self):
+        """
+        Return the index of the next unallocated piece of memory
+
+        e.g. ['+1000', '-1000', '+1234'] has a next available address at index 3
+        """
+        return len(self.mem)
+
+    def writenext(self, value):
+        self.write(value, self.__next)
