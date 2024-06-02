@@ -12,6 +12,7 @@
 #####################################################
 
 from sys import argv
+from uvsim import UVSim
 
 def main():
     """
@@ -20,9 +21,16 @@ def main():
     banner()
 
     if len(argv) != 2:
-        print("Please specify a compiled program to execute")
+        print("Please specify a program to execute")
         exit(1)
-    pass
+
+    
+    program = argv[-1]
+    uvsim = UVSim()
+
+    uvsim.load(program)
+    uvsim.execute()
+    
 
 def banner():
     """
