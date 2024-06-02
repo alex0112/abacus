@@ -5,7 +5,7 @@ class Memory:
     An abstraction representing the Memory of the UVSim virtual manchine
     """
 
-    def __init__():
+    def __init__(self):
         """
         Create a new memory array for a UVSim virtual machine.
         """
