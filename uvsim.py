@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-import CPU
-import Memory
-import IODevice
+from src.cpu import CPU
+from src.memory import Memory
+from src.io_device import IODevice
 
 class UVSim:
     """
     An abstraction representing the UVSim virtual machine. It represents the current state of the virtual machine and creates its memory, register, and CPU.
     """
-    def __init__():
+    def __init__(self):
         """
         Initialize and create a UVSim VM
         """
-        self.__memory = Memory.new()
-        self.__io  = IODevice.new()
-        self.__cpu = CPU.new()
+        self.__memory = Memory()
+        self.__io  = IODevice()
+        self.__cpu = CPU()
 
     @property
     def mem(self):
@@ -25,7 +25,7 @@ class UVSim:
         return self.__cpu
 
     @property
-    def io_device:
+    def io_device(self):
         return self.__io
 
     def load(self, filename):
@@ -46,9 +46,7 @@ class UVSim:
         if len(self.mem) == 0:
             pass ## TODO: define this behavior
         else:
-            for raw_num in self.mem:
-                opcode = Opcode.new(raw_num) ## see opcode.py
-
-                self.cpu.process(opcode, self.mem, self.io_device)
-
+            self.cpu.run(self.memory)
+            
+                
         
