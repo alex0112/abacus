@@ -3,6 +3,7 @@
 from src.cpu import CPU
 from src.memory import Memory
 from src.io_device import IODevice
+from src.opcode import Opcode
 
 class UVSim:
     """
@@ -33,20 +34,18 @@ class UVSim:
         Given a filename load its contents into memory starting at location `00`
         """
         with open(filename) as program:
-            if len(program) > 100:
-                pass ## TODO: We need to define behavior for when a program exceeds the available memory
+            #if len(program) > 100: ## TODO: write a check here for memory bounds
+            #    pass ## TODO: We need to define behavior for when a program exceeds the available memory
 
-            for opcode in program:
+            for line in program:
+                opcode = Opcode(line)
                 self.mem.writenext(opcode)
 
     def execute(self):
         """
         Walk through the contents of memory and hand each instruction to the CPU
         """
-        if len(self.mem) == 0:
-            pass ## TODO: define this behavior
-        else:
-            self.cpu.run(self.memory)
-            
-                
-        
+        #if len(self.mem) == 0:
+        #pass ## TODO: define this behavior
+        #else:
+        self.cpu.run(self.mem, self.io_device)
