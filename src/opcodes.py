@@ -17,21 +17,19 @@ class Opcode:
 
         ## TODO: We could implement other convenience attributes here like a human friendly representation of the opcode
 
-    def get_operation(self):
+    @property
+    def name(self):
         #returns operation of the first 2 digits of raw opcode (10 returns READ)
         operation = int(self.raw[1:3])
-        if operation in self.op_list:
-            print(operation, self.op_list[operation])
-        else:
-            raise ValueError("Operation is not Valid")
+        return self.op_list.get(operation, "NOOP")
 
-
-         
-    def get_sign(self):
+    @property
+    def sign(self):
         #returns sign at the beginning of opcode(+,-)
         return self.raw[0]
-
-    def get_operand(self):
+    
+    @property
+    def operand(self):
         #returns operand or final 2 digits in raw opcode
         return self.raw[3:]
     
