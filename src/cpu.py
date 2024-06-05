@@ -118,16 +118,18 @@ class CPU:
         pass
 
     def branch(self, memory, address):
-        pass
+        self.current = address
 
     def branchneg(self, memory, address):
-        pass
+        if self.acc.sign == '-':
+            self.current = address
 
     def branchzero(self, memory, address):
-        pass
+        if self.acc == 0:
+            self.current = address
 
     def halt(self):
         self.halted = True
 
     def noop(self):
-        pass
+        pass ## Complete by definition
