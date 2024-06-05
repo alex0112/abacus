@@ -34,11 +34,4 @@ The last two digits of a BasicML instruction are the operand – the address of 
 
 ## Proposed Architecture:
 
-- `basm.py` => an assembler that takes valid BasicML program and turns it into CPU instructions for the VM (proposing `.bml` and `.basm` as the respective file extensions)
-- `main.py` => Instantiates a virtual machine and loads an assembled `.basm` program into it.
-
-#### Modules:
-
-- `src/uvsim.py` => An abstraction representing the virtual machine (Composes the CPU and Memory into itself)
-- `src/cpu.py` => An abstraction represting the CPU (including its accumulator/register)
-- `src/memory.py` => An abstraction representing the memory of the VM
+See [ARCH.md](https://github.com/alex0112/abacus/blob/main/ARCH.md)

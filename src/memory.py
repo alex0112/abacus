@@ -5,11 +5,15 @@ class Memory:
     An abstraction representing the Memory of the UVSim virtual manchine
     """
 
-    def __init__():
+    def __init__(self):
         """
         Create a new memory array for a UVSim virtual machine.
         """
         self.__mem = []
+
+        
+    def __len__(self):
+        return len(self.__mem)
 
     @property
     def mem(self):
@@ -18,14 +22,18 @@ class Memory:
         """
         return self.__mem
 
+    
     def write(self, value, address):
         """
         Set the value (should be a signed opcode/number) at a specific index.
 
         If the memory has not yet been allocated, create it.
         """
-        pass ## TODO write me
+        pass
 
+    def read(self, address):
+        return self.__mem[address]
+        
     @property
     def __next(self):
         """
@@ -36,4 +44,5 @@ class Memory:
         return len(self.mem)
 
     def writenext(self, value):
-        self.write(value, self.__next)
+        #self.write(value, self.__next)
+        self.mem.append(value)
