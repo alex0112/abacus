@@ -6,6 +6,7 @@ class Opcode:
     def __init__(self, raw):
         self.raw = raw
         self.sign = ""
+        self.op_list = {10:"READ", 11:"WRITE", 20:"LOAD", 21:"STORE", 30:"ADD", 31:"SUBTRACT", 32:"DIVIDE", 33:"MULTIPLY", 40:"BRANCH", 41:"BRANCHNEG", 42:"BRANCHZERO", 43:"HALT"}
 
         if raw[0] != '-' and raw[0] != '+':
             raise ValueError("Must have a + or - at the beginning of opcode")
@@ -18,7 +19,13 @@ class Opcode:
 
     def get_operation(self):
         #returns operation of the first 2 digits of raw opcode (10 returns READ)
-        return self.raw[1:3]
+        operation = int(self.raw[1:3])
+        if operation in self.op_list:
+            print(operation, self.op_list[operation])
+        else:
+            raise ValueError("Operation is not Valid")
+
+
          
     def get_sign(self):
         #returns sign at the beginning of opcode(+,-)
@@ -32,6 +39,7 @@ class Opcode:
         return self.raw
     
 opcode = Opcode("+1042")
+opcode.get_operation()
 
 
 
