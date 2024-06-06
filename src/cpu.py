@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from .opcode import Opcode
+
 class CPU:
     """
     An abstraction representing a CPU.
@@ -10,7 +12,10 @@ class CPU:
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.
         """
-        self.__acc = 0
+
+        self.__acc = Opcode("0000")
+        self.__current = 0 ## Where to start executing the program.
+        self.__halted = False ## Whether or not the current execution should stop
 
     @property
     def acc(self):
@@ -27,6 +32,82 @@ class CPU:
         This allows setting the accumulator to a new value during operations.
         """
         self.__acc = val
+
+    @property
+    def current(self):
+        return self.__current
+
+    @current.setter
+    def current(self, val):
+        if val > 99 or val < 0:
+            raise ValueError(f"Attempted to set current address to {val}. Cannot set to a value that is not between 0-99 inclusive.")
+        elif val == 99:
+            self.halted = True
+
+        self.__current = val
+
+    @property
+    def halted(self):
+        return self.__halted
+
+    @halted.setter
+    def halted(self, val):
+        self.__halted = val
+
+    def run(self, memory, io_device, address=0):
+        self.current = address
+
+        while not self.halted:
+            if self.current > len(memory)-1 or len(memory) == 0: ## If we reach the end of the program it's over
+                self.halted = True
+                break
+
+            current_opcode = memory.read(self.current)
+            self.process(current_opcode, memory, io_device)
+            self.current += 1 ## Move on to the next address
+
+
+    def process(self, opcode, memory, io_device):
+        """
+        Given an opcode, memory object, and peripherals, modify the memory according to the instruction and value given.
+        
+        Args:
+            opcode (int): The opcode to be processed.
+            memory (Memory): The memory object involved in the operation.
+            io_device (IODevice): The I/O device involved in the operation.
+        
+        Raises:
+            ValueError: If an unknown opcode is encountered.
+            IndexError: If the address is out of bounds.
+        """
+
+        match opcode.name:
+            case "READ":
+                self.read(memory, opcode.operand, iodevice)
+            case "WRITE":
+                self.write(memory, opcode.operand, iodevice)
+            case "LOAD":
+                self.load(memory, opcode.operand)
+            case "STORE":
+                self.store(memory, opcode.operand)
+            case "ADD":
+                self.store(memory, opcode.operand)
+            case "SUBTRACT":
+                self.subtract(memory, opcode.operand)
+            case "MULTIPLY":
+                self.multiply(memory, opcode.operand)
+            case "DIVIDE":
+                self.divide(memory, opcode.operand)
+            case "BRANCH":
+                self.branch(memory, opcode.operand)
+            case "BRANCHNEG":
+                self.branchneg(memory, opcode.operand)
+            case "BRANCHZERO":
+                self.branchzero(memory, opcode.operand)
+            case "HALT":
+                self.halt()
+            case _:
+                self.noop() ## In this case treat the opcode as a raw piece of data and not an instruction
 
     def read(self, memory, io_device, address):
         """
@@ -72,37 +153,29 @@ class CPU:
         """
         memory.write(address, self.acc)
 
-    def process(self, opcode, memory, io_device):
-        """
-        Given an opcode, memory object, and peripherals, modify the memory according to the instruction and value given.
-        
-        Args:
-            opcode (int): The opcode to be processed.
-            memory (Memory): The memory object involved in the operation.
-            io_device (IODevice): The I/O device involved in the operation.
-        
-        Raises:
-            ValueError: If an unknown opcode is encountered.
-            IndexError: If the address is out of bounds.
-        """
-        if not 1000 <= opcode < 10000:
-            raise ValueError(f"Invalid opcode format: {opcode}")
+    def add(self, memory, address):
+        pass
 
-        instruction = opcode // 100
-        address = opcode % 100
+    def subtract(self, memory, address):
+        pass
 
-        print(f"Processing opcode {opcode}, instruction {instruction}, address {address}")
+    def multiply(self, memory, address):
+        pass
 
-        if not 0 <= address < len(memory.mem):
-            raise IndexError(f"Memory address out of range: {address}")
+    def divide(self, memory, address):
+        pass
 
-        if instruction == 10:  # READ
-            self.read(memory, io_device, address)
-        elif instruction == 11:  # WRITE
-            self.write(memory, io_device, address)
-        elif instruction == 20:  # LOAD
-            self.load(memory, address)
-        elif instruction == 21:  # STORE
-            self.store(memory, address)
-        else:
-            raise ValueError(f"Unknown opcode: {instruction}")
+    def branch(self, memory, address):
+        pass
+
+    def branchneg(self, memory, address):
+        pass
+
+    def branchzero(self, memory, address):
+        pass
+
+    def halt(self):
+        self.halted = True
+
+    def noop(self):
+        pass
