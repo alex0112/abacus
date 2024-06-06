@@ -4,12 +4,15 @@ from .opcode import Opcode
 
 class CPU:
     """
-    An abstraction representing a CPU
+    An abstraction representing a CPU.
+    This CPU contains an accumulator register and processes opcodes to perform various operations.
     """
     def __init__(self):
         """
-        Create a new CPU for a UVSim virtual machine.
+        Initialize the CPU with an accumulator set to 0000.
+        The accumulator is used for arithmetic and data manipulation operations.
         """
+
         self.__acc = Opcode("0000")
         self.__current = 0 ## Where to start executing the program.
         self.__halted = False ## Whether or not the current execution should stop
@@ -17,14 +20,16 @@ class CPU:
     @property
     def acc(self):
         """
-        Return the current state of the accumulator register in the VM
+        Return the current state of the accumulator register in the VM.
+        The accumulator is a central component for performing calculations.
         """
         return self.__acc
 
     @acc.setter
     def acc(self, val):
         """
-        Update the current state of the accumulator register in the VM
+        Update the current state of the accumulator register in the VM.
+        This allows setting the accumulator to a new value during operations.
         """
         self.__acc = val
 
@@ -61,10 +66,21 @@ class CPU:
             self.process(current_opcode, memory, io_device)
             self.current += 1 ## Move on to the next address
 
+
     def process(self, opcode, memory, io_device):
         """
-        Given an opcode, memory object, and peripherals, modify the memory according to the instruction and value given
+        Given an opcode, memory object, and peripherals, modify the memory according to the instruction and value given.
+        
+        Args:
+            opcode (int): The opcode to be processed.
+            memory (Memory): The memory object involved in the operation.
+            io_device (IODevice): The I/O device involved in the operation.
+        
+        Raises:
+            ValueError: If an unknown opcode is encountered.
+            IndexError: If the address is out of bounds.
         """
+
         match opcode.name:
             case "READ":
                 self.read(memory, opcode.operand, iodevice)
@@ -93,17 +109,49 @@ class CPU:
             case _:
                 self.noop() ## In this case treat the opcode as a raw piece of data and not an instruction
 
-    def read(self, memory, address, iodevice):
-        pass
+    def read(self, memory, io_device, address):
+        """
+        Read a word from the keyboard into a specific location in memory.
+        
+        Args:
+            memory (Memory): The memory object where data will be written.
+            io_device (IODevice): The I/O device used for reading input.
+            address (int): The memory address where the input data will be stored.
+        """
+        data = io_device.read()
+        memory.write(address, data)
 
-    def write(self, memory, address, iodevice):
-        pass
+    def write(self, memory, io_device, address):
+        """
+        Write a word from a specific location in memory to the screen.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            io_device (IODevice): The I/O device used for writing output.
+            address (int): The memory address from which the data will be read.
+        """
+        data = memory.read(address)
+        io_device.write(data)
 
     def load(self, memory, address):
-        pass
+        """
+        Load a word from a specific location in memory into the accumulator.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address from which the data will be loaded into the accumulator.
+        """
+        self.acc = memory.read(address)
 
     def store(self, memory, address):
-        pass
+        """
+        Store a word from the accumulator into a specific location in memory.
+        
+        Args:
+            memory (Memory): The memory object where data will be written.
+            address (int): The memory address where the accumulator data will be stored.
+        """
+        memory.write(address, self.acc)
 
     def add(self, memory, address):
         pass
