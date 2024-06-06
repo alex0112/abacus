@@ -42,10 +42,7 @@ class Opcode:
     def __str__(self):
         return self.__raw
     
-opcode = Opcode("1042")
-print(opcode.name)
-print(opcode.sign)
-print(opcode.operand)
+
 
 
 
