@@ -30,10 +30,9 @@ class Memory:
         Raises:
             IndexError: If the address is out of bounds.
         """
-        if 0 <= address < len(self.__mem):
-            self.__mem[address] = value
-        else:
+        if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
+        self.__mem[address] = value
 
     def read(self, address):
         """
@@ -48,10 +47,9 @@ class Memory:
         Raises:
             IndexError: If the address is out of bounds.
         """
-        if 0 <= address < len(self.__mem):
-            return self.__mem[address]
-        else:
+        if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
+        return self.__mem[address]
 
     @property
     def __next(self):

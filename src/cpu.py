@@ -10,7 +10,7 @@ class CPU:
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.
         """
-        self.__acc = 0000
+        self.__acc = 0
 
     @property
     def acc(self):
@@ -83,9 +83,18 @@ class CPU:
         
         Raises:
             ValueError: If an unknown opcode is encountered.
+            IndexError: If the address is out of bounds.
         """
+        if not 1000 <= opcode < 10000:
+            raise ValueError(f"Invalid opcode format: {opcode}")
+
         instruction = opcode // 100
         address = opcode % 100
+
+        print(f"Processing opcode {opcode}, instruction {instruction}, address {address}")
+
+        if not 0 <= address < len(memory.mem):
+            raise IndexError(f"Memory address out of range: {address}")
 
         if instruction == 10:  # READ
             self.read(memory, io_device, address)
@@ -96,4 +105,4 @@ class CPU:
         elif instruction == 21:  # STORE
             self.store(memory, address)
         else:
-            raise ValueError(f"Unknown opcode: {opcode}")
+            raise ValueError(f"Unknown opcode: {instruction}")
