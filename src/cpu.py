@@ -83,9 +83,9 @@ class CPU:
 
         match opcode.name:
             case "READ":
-                self.read(memory, opcode.operand, iodevice)
+                self.read(memory, opcode.operand, io_device)
             case "WRITE":
-                self.write(memory, opcode.operand, iodevice)
+                self.write(memory, opcode.operand, io_device)
             case "LOAD":
                 self.load(memory, opcode.operand)
             case "STORE":
