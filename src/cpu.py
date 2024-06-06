@@ -107,30 +107,30 @@ class CPU:
 
     
     def add(self, memory, address):
-        self.__acc += memory.read(address)
+        self.acc += memory.read(address)
 
-        if self.__acc > 9999 and self.__acc < -9999:
-            self.__acc = self.__acc % 10000
+        if self.acc > 9999 and self.acc < -9999:
+            self.acc = self.acc % 10000
             raise "The values added were greater than storage capacity.  Maintaining the last four digits."
 
 
     def subtract(self, memory, address):
-        self.__acc -= memory.read(address)
+        self.acc -= memory.read(address)
 
-        if self.__acc > 9999 and self.__acc < -9999:
-            self.__acc = self.__acc % 10000
+        if self.acc > 9999 and self.acc < -9999:
+            self.acc = self.acc % 10000
             raise "The values subtracted were greater than storage capacity.  Maintaining the last four digits."
 
 
     def multiply(self, memory, address):
-        self.__acc *= memory.read(address)
+        self.acc *= memory.read(address)
 
-        if self.__acc > 9999 and self.__acc < -9999:
-            self.__acc = self.__acc % 10000
+        if self.acc > 9999 and self.acc < -9999:
+            self.acc = self.acc % 10000
             raise "The values multiplied were greater than storage capacity.  Maintaining the last four digits."
 
     def divide(self, memory, address):
-        self.__acc //= memory.read(address)
+        self.acc //= memory.read(address)
         
 
     def branch(self, memory, address):
