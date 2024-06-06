@@ -67,9 +67,9 @@ class CPU:
         """
         match opcode.name:
             case "READ":
-                self.read(memory, opcode.operand, iodevice)
+                self.read(memory, opcode.operand, io_device)  #changed iodevice to io_device. Scott
             case "WRITE":
-                self.write(memory, opcode.operand, iodevice)
+                self.write(memory, opcode.operand, io_device)  #changed iodevice to io_device. Scott
             case "LOAD":
                 self.load(memory, opcode.operand)
             case "STORE":
@@ -105,17 +105,33 @@ class CPU:
     def store(self, memory, address):
         pass
 
+    #Added functionality to the empty functions add, subtract, multiply and divide.  Unable to test at the time of coding. Scott
     def add(self, memory, address):
-        pass
+        self.__acc += memory.read(address)
+
+        if self.__acc > 9999 and self.__acc < -9999:
+            self.__acc = self.__acc % 10000
+            raise "The values added were greater than storage capacity.  Maintaining the last four digits."
+
 
     def subtract(self, memory, address):
-        pass
+        self.__acc -= memory.read(address)
+
+        if self.__acc > 9999 and self.__acc < -9999:
+            self.__acc = self.__acc % 10000
+            raise "The values subtracted were greater than storage capacity.  Maintaining the last four digits."
+
 
     def multiply(self, memory, address):
-        pass
+        self.__acc *= memory.read(address)
+
+        if self.__acc > 9999 and self.__acc < -9999:
+            self.__acc = self.__acc % 10000
+            raise "The values multiplied were greater than storage capacity.  Maintaining the last four digits."
 
     def divide(self, memory, address):
-        pass
+        self.__acc //= memory.read(address)
+        
 
     def branch(self, memory, address):
         pass
