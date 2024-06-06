@@ -67,9 +67,9 @@ class CPU:
         """
         match opcode.name:
             case "READ":
-                self.read(memory, opcode.operand, io_device)  #changed iodevice to io_device. Scott
+                self.read(memory, opcode.operand, io_device)
             case "WRITE":
-                self.write(memory, opcode.operand, io_device)  #changed iodevice to io_device. Scott
+                self.write(memory, opcode.operand, io_device)
             case "LOAD":
                 self.load(memory, opcode.operand)
             case "STORE":
@@ -105,7 +105,7 @@ class CPU:
     def store(self, memory, address):
         pass
 
-    #Added functionality to the empty functions add, subtract, multiply and divide.  Unable to test at the time of coding. Scott
+    
     def add(self, memory, address):
         self.__acc += memory.read(address)
 
