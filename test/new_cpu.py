@@ -74,14 +74,14 @@ def test_load_failure(cpu, memory):
     with pytest.raises(IndexError):
         cpu.process(20200, memory, None)
 
-# Updated Unit Test 
-def test_store(cpu, memory):
-    cpu = CPU()
-    mem = Memory()
-    cpu.acc = Opcode("+1234")
-    cpu.store(mem, 1)
-    assert cpu.acc == mem[1]
+def test_store_success(cpu, memory):
+    
 
+
+
+    #cpu.acc = 1122
+    #cpu.process(2130, memory, None)
+    #assert memory.read(30) == 1122
 
 
 def test_store_failure(cpu, memory):

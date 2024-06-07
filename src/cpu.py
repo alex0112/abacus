@@ -29,7 +29,6 @@ class CPU:
     def acc(self, val):
         """
         Update the current state of the accumulator register in the VM.
-        This allows setting the accumulator to a new value during operations.
         """
         self.__acc = val
 
