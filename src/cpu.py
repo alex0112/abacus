@@ -39,7 +39,7 @@ class CPU:
     @current.setter
     def current(self, val):
         if val > 99 or val < 0:
-            raise ValueError(f"Attempted to set current address to {val}. Cannot set to a value that is not between 0-99 inclusive.")
+            raise IndexError(f"Attempted to set current address to {val}. Cannot set to a value that is not between 0-99 inclusive.")
         elif val == 99:
             self.halted = True
 
