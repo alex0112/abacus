@@ -11,7 +11,7 @@ class Memory:
         Initializes memory with 100 words, each initialized to 0.
         """
         self.__mem = [0] * 100  # Assuming memory size is 100 words
-        
+
     def __len__(self):
         return len(self.__mem)
 
@@ -22,7 +22,7 @@ class Memory:
         """
         return self.__mem
 
-    def write(self, value, address):
+    def write(self, address, value):
         """
         Set the value (should be a signed opcode/number) at a specific index.
         
@@ -33,7 +33,6 @@ class Memory:
         Raises:
             IndexError: If the address is out of bounds.
         """
-
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
         self.__mem[address] = value
@@ -55,9 +54,6 @@ class Memory:
             raise IndexError("Memory address out of range")
         return self.__mem[address]
 
-    def read(self, address):
-        return self.__mem[address]
-        
     @property
     def __next(self):
         """

@@ -14,8 +14,8 @@ class CPU:
         """
 
         self.__acc = Opcode("0000")
-        self.__current = 0 ## Where to start executing the program.
-        self.__halted = False ## Whether or not the current execution should stop
+        self.__current = 0  # Where to start executing the program.
+        self.__halted = False  # Whether or not the current execution should stop
 
     @property
     def acc(self):
@@ -57,14 +57,13 @@ class CPU:
         self.current = address
 
         while not self.halted:
-            if self.current > len(memory)-1 or len(memory) == 0: ## If we reach the end of the program it's over
+            if self.current > len(memory) - 1 or len(memory) == 0:  # If we reach the end of the program it's over
                 self.halted = True
                 break
 
             current_opcode = memory.read(self.current)
             self.process(current_opcode, memory, io_device)
-            self.current += 1 ## Move on to the next address
-
+            self.current += 1  # Move on to the next address
 
     def process(self, opcode, memory, io_device):
         """
@@ -82,31 +81,31 @@ class CPU:
 
         match opcode.name:
             case "READ":
-                self.read(memory, opcode.operand, iodevice)
+                self.read(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
             case "WRITE":
-                self.write(memory, opcode.operand, iodevice)
+                self.write(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
             case "LOAD":
-                self.load(memory, opcode.operand)
+                self.load(memory, int(opcode.operand))  # Cast operand to int
             case "STORE":
-                self.store(memory, opcode.operand)
+                self.store(memory, int(opcode.operand))  # Cast operand to int
             case "ADD":
-                self.store(memory, opcode.operand)
+                self.add(memory, int(opcode.operand))  # Fixed typo and cast operand to int
             case "SUBTRACT":
-                self.subtract(memory, opcode.operand)
+                self.subtract(memory, int(opcode.operand))  # Cast operand to int
             case "MULTIPLY":
-                self.multiply(memory, opcode.operand)
+                self.multiply(memory, int(opcode.operand))  # Cast operand to int
             case "DIVIDE":
-                self.divide(memory, opcode.operand)
+                self.divide(memory, int(opcode.operand))  # Cast operand to int
             case "BRANCH":
-                self.branch(memory, opcode.operand)
+                self.branch(memory, int(opcode.operand))  # Cast operand to int
             case "BRANCHNEG":
-                self.branchneg(memory, opcode.operand)
+                self.branchneg(memory, int(opcode.operand))  # Cast operand to int
             case "BRANCHZERO":
-                self.branchzero(memory, opcode.operand)
+                self.branchzero(memory, int(opcode.operand))  # Cast operand to int
             case "HALT":
                 self.halt()
             case _:
-                self.noop() ## In this case treat the opcode as a raw piece of data and not an instruction
+                self.noop()  # In this case treat the opcode as a raw piece of data and not an instruction
 
     def read(self, memory, io_device, address):
         """
@@ -117,7 +116,7 @@ class CPU:
             io_device (IODevice): The I/O device used for reading input.
             address (int): The memory address where the input data will be stored.
         """
-        data = io_device.read()
+        data = int(io_device.read())  # Ensure data is integer
         memory.write(address, data)
 
     def write(self, memory, io_device, address):
@@ -150,28 +149,82 @@ class CPU:
             memory (Memory): The memory object where data will be written.
             address (int): The memory address where the accumulator data will be stored.
         """
-        memory.write(address, self.acc)
+        memory.write(address, int(str(self.acc)))  # Ensure acc is written as integer
 
     def add(self, memory, address):
-        pass
+        """
+        Add a word from a specific location in memory to the accumulator.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address from which the data will be added to the accumulator.
+        """
+        self.acc = Opcode(f"{int(str(self.acc)) + memory.read(address):+05d}")
 
     def subtract(self, memory, address):
-        pass
+        """
+        Subtract a word from a specific location in memory from the accumulator.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address from which the data will be subtracted from the accumulator.
+        """
+        self.acc = Opcode(f"{int(str(self.acc)) - memory.read(address):+05d}")
 
     def multiply(self, memory, address):
-        pass
+        """
+        Multiply a word from a specific location in memory with the accumulator.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address from which the data will be multiplied with the accumulator.
+        """
+        self.acc = Opcode(f"{int(str(self.acc)) * memory.read(address):+05d}")
 
     def divide(self, memory, address):
-        pass
+        """
+        Divide the accumulator by a word from a specific location in memory.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address from which the data will be used to divide the accumulator.
+        """
+        divisor = memory.read(address)
+        if divisor == 0:
+            raise ZeroDivisionError("Cannot divide by zero")
+        self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
 
     def branch(self, memory, address):
-        pass
+        """
+        Branch to a specific location in memory.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address to branch to.
+        """
+        self.current = address
 
     def branchneg(self, memory, address):
-        pass
+        """
+        Branch to a specific location in memory if the accumulator is negative.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address to branch to.
+        """
+        if int(str(self.acc)) < 0:
+            self.current = address
 
     def branchzero(self, memory, address):
-        pass
+        """
+        Branch to a specific location in memory if the accumulator is zero.
+        
+        Args:
+            memory (Memory): The memory object where data will be read from.
+            address (int): The memory address to branch to.
+        """
+        if int(str(self.acc)) == 0:
+            self.current = address
 
     def halt(self):
         self.halted = True
