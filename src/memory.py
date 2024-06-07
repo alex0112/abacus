@@ -11,7 +11,7 @@ class Memory:
         Initializes memory with 100 words, each initialized to 0.
         """
         self.__mem = [0] * 100  # Assuming memory size is 100 words
-
+        
     def __len__(self):
         return len(self.__mem)
 
@@ -53,7 +53,7 @@ class Memory:
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
         return self.__mem[address]
-
+        
     @property
     def __next(self):
         """
@@ -62,7 +62,10 @@ class Memory:
         Returns:
             int: The index of the next available address.
         """
-        return len(self.mem)
+        for i, value in enumerate(self.__mem):
+            if value == 0:
+                return i
+        return len(self.__mem)
 
     def writenext(self, value):
         """
@@ -70,5 +73,11 @@ class Memory:
         
         Args:
             value (int): The value to write at the next available address.
+
+        Raises:
+            IndexError: If there is no available memory address.
         """
-        self.write(self.__next, value)
+        next_addr = self.__next
+        if next_addr >= len(self.__mem):
+            raise IndexError("No available memory address")
+        self.write(next_addr, value)

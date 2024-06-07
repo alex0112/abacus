@@ -154,42 +154,41 @@ class CPU:
     def add(self, memory, address):
         """
         Add a word from a specific location in memory to the accumulator.
-        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be added to the accumulator.
         """
-        self.acc = Opcode(f"{int(str(self.acc)) + memory.read(address):+05d}")
+        operand = int(str(memory.read(address)))
+        self.acc = Opcode(f"{int(str(self.acc)) + operand:+05d}")
 
     def subtract(self, memory, address):
         """
         Subtract a word from a specific location in memory from the accumulator.
-        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be subtracted from the accumulator.
         """
-        self.acc = Opcode(f"{int(str(self.acc)) - memory.read(address):+05d}")
+        operand = int(str(memory.read(address)))
+        self.acc = Opcode(f"{int(str(self.acc)) - operand:+05d}")
 
     def multiply(self, memory, address):
         """
         Multiply a word from a specific location in memory with the accumulator.
-        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be multiplied with the accumulator.
         """
-        self.acc = Opcode(f"{int(str(self.acc)) * memory.read(address):+05d}")
+        operand = int(str(memory.read(address)))
+        self.acc = Opcode(f"{int(str(self.acc)) * operand:+05d}")
 
     def divide(self, memory, address):
         """
         Divide the accumulator by a word from a specific location in memory.
-        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be used to divide the accumulator.
         """
-        divisor = memory.read(address)
+        divisor = int(str(memory.read(address)))
         if divisor == 0:
             raise ZeroDivisionError("Cannot divide by zero")
         self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
