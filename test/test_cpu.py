@@ -2,10 +2,10 @@ import sys
 import os
 import pytest
 from unittest.mock import MagicMock
-from cpu import CPU
+from src.cpu import CPU
 from memory import Memory
 from io_device import IODevice
-from src.opcode import Opcode
+from opcodes import Opcode
 
 # Ensure the src directory is in the Python path for module imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
