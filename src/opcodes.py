@@ -69,3 +69,8 @@ class Opcode:
         if isinstance(other, Opcode):
             return Opcode(f"{int(self.__raw) // int(other.__raw):+05d}")
         return NotImplemented
+
+    def __rtruediv__(self, other):
+        if isinstance(other, int):
+            return Opcode(f"{int(self.__raw) // other:+05d}")
+        return NotImplemented

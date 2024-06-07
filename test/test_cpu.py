@@ -66,7 +66,7 @@ def test_read_good_word(cpu, memory, io_device):
     assert memory.read(10) == 1234 
 
 def test_read_bad_word(cpu, memory, io_device):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("10100")
         io_device.read = lambda: "1234"
         cpu.process(op, memory, io_device)
@@ -76,13 +76,13 @@ def test_read_bad_word(cpu, memory, io_device):
 #########
 def test_write(cpu, memory, io_device):
     memory.write(20, 5678)
-    io_device.write = lambda x: str(x)  # Fix: ensure lambda returns string
+    io_device.write = lambda x: str(x)
     op = Opcode("1120")
     cpu.process(op, memory, io_device)
-    assert io_device.write(5678) == "5678"  # Fixed: ensure both are strings
+    assert io_device.write(5678) == "5678"
 
 def test_write_bad_word(cpu, memory, io_device):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("11100")
         cpu.process(op, memory, io_device)
 
@@ -91,13 +91,13 @@ def test_write_bad_word(cpu, memory, io_device):
 ########
 
 def test_load(cpu, memory):
-    memory.write(30, Opcode("9101"))  # Fix: use Opcode object
+    memory.write(30, Opcode("9101"))
     op = Opcode("2030")
     cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("9101")  # Fixed: compare with Opcode object
+    assert cpu.acc == Opcode("9101")
 
 def test_load_bad_word(cpu, memory):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("20200")
         cpu.process(op, memory, None)
 
@@ -108,10 +108,10 @@ def test_store(cpu, memory, io_device):
     op = Opcode("+1337")
     cpu.acc = op
     cpu.store(memory, 42)
-    assert memory.read(42) == int(str(op))  # Fixed: compare with integer value
+    assert memory.read(42) == int(str(op))
 
 def test_store_bad_word(cpu, memory):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         cpu.acc = Opcode("1234")
         op = Opcode("21200")
         cpu.process(op, memory, None)
@@ -125,10 +125,10 @@ def test_add(cpu, memory, io_device):
     memory.write(40, Opcode("1000"))
     op = Opcode("3040")
     cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("2234")
+    assert cpu.acc == Opcode("+2234")
 
 def test_add_bad_word(cpu, memory, io_device):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("30100")
         cpu.process(op, memory, None)
 
@@ -141,10 +141,10 @@ def test_subtract(cpu, memory, io_device):
     memory.write(50, Opcode("1234"))
     op = Opcode("3150")
     cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("4444")
+    assert cpu.acc == Opcode("+4444")
 
 def test_subtract_bad_word(cpu, memory, io_device):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("31100")
         cpu.process(op, memory, None)
 
@@ -157,10 +157,10 @@ def test_multiply(cpu, memory, io_device):
     memory.write(60, Opcode("0002"))
     op = Opcode("3260")
     cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("2468")
+    assert cpu.acc == Opcode("+2468")
 
 def test_multiply_bad_word(cpu, memory, io_device):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("32100")
         cpu.process(op, memory, None)
 
@@ -173,10 +173,10 @@ def test_divide(cpu, memory, io_device):
     memory.write(70, Opcode("0002"))
     op = Opcode("3370")
     cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("0617")
+    assert cpu.acc == Opcode("+0617")
 
 def test_divide_bad_word(cpu, memory, io_device):
-    with pytest.raises(IndexError):
+    with pytest.raises(ValueError):
         op = Opcode("33100")
         cpu.process(op, memory, None)
 
