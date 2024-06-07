@@ -11,7 +11,7 @@ class Memory:
         """
         Create a new memory array for a UVSim virtual machine.
         """
-        self.__mem = [None] * size
+        self.__mem = [Opcode("+0000")] * size
 
         
     def __len__(self):
