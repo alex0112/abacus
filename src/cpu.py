@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from opcodes import Opcode
+from .opcodes import Opcode
 
 class CPU:
     """

@@ -21,64 +21,77 @@ def memory():
 def io_device():
     return IODevice()
 
-
 ##################
 # Instantiation: #
 ##################
 
 def test_init_with_plus():
-    pass
+    op = Opcode("+1234")
+    assert str(op) == "+1234"
 
 def test_init_with_minus():
-    pass
+    op = Opcode("-1234")
+    assert str(op) == "-1234"
 
 def test_init_with_no_sign():
-    pass
+    op = Opcode("1234")
+    assert str(op) == "+1234"
 
 def test_init_with_too_long():
-    pass
+    with pytest.raises(ValueError):
+        Opcode("12345")
 
 def test_init_with_too_short():
-    pass
+    with pytest.raises(ValueError):
+        Opcode("123")
 
 def test_init_with_non_num():
-    pass
+    with pytest.raises(ValueError):
+        Opcode("12a4")
 
 def test_init_with_empty():
-    pass
+    with pytest.raises(ValueError):
+        Opcode("")
 
 def test_init_with_too_large():
-    pass
+    with pytest.raises(ValueError):
+        Opcode("+12345")
 
 def test_init_with_too_small():
-    pass
-   
+    with pytest.raises(ValueError):
+        Opcode("+123")
+
 #########
 # Name: #
 #########
 
 def test_name():
-    pass
+    op = Opcode("+1034")
+    assert op.name == "READ"
 
 def test_noop():
-    pass
+    op = Opcode("+9999")
+    assert op.name == "NOOP"
 
 #########
 # Sign: #
 #########
 
 def test_plus():
-    pass
+    op = Opcode("+1234")
+    assert op.sign == "+"
 
 def test_minus():
-    pass
+    op = Opcode("-1234")
+    assert op.sign == "-"
 
 ############
 # Operand: #
 ############
 
 def test_operand():
-    pass
+    op = Opcode("+1234")
+    assert op.operand == "34"
 
 ##########################
 # String Representation: #
@@ -86,14 +99,15 @@ def test_operand():
 
 def test_str_from_minus():
     op = Opcode("-1234")
-
     assert str(op) == "-1234"
 
 def test_str_from_plus():
-    pass
+    op = Opcode("+1234")
+    assert str(op) == "+1234"
 
 def test_str_from_no_sign():
-    pass
+    op = Opcode("1234")
+    assert str(op) == "+1234"
 
 #############
 # Equality: #
@@ -102,13 +116,11 @@ def test_str_from_no_sign():
 def test_basic_equality():
     op1 = Opcode("+0000")
     op2 = Opcode("+0000")
-
     assert op1 == op2
 
 def test_basic_inequality():
     op1 = Opcode("+1000")
     op2 = Opcode("+0001")
-
     assert op1 != op2
 
 #############
@@ -118,37 +130,26 @@ def test_basic_inequality():
 def test_basic_add():
     op1 = Opcode("+0000")
     op2 = Opcode("+1000")
-
     result = op1 + op2
-
     assert result == Opcode("+1000")
 
 def test_add_negative_and_positive():
     op1 = Opcode("+0000")
     op2 = Opcode("-1000")
-
     result = op1 + op2
-
     assert result == Opcode("-1000")
 
 def test_add_negative_and_negative():
     op1 = Opcode("-1000")
     op2 = Opcode("-1000")
-
     result = op1 + op2
-
     assert result == Opcode("-2000")
-
 
 def test_overflow():
     op1 = Opcode("+9999")
     op2 = Opcode("+0001")
-
     result = op1 + op2
-
-    ## TODO: Undefined behavior currently. Figure this out
-
-## TODO: Write more tests here
+    assert result == Opcode("+0000")
 
 ################
 # Subtraction: #
@@ -157,29 +158,20 @@ def test_overflow():
 def test_basic_subtraction():
     op1 = Opcode("+0000")
     op2 = Opcode("+1000")
-
     result = op1 - op2
-
     assert result == Opcode("-1000")
 
 def test_subtract_a_negative():
     op1 = Opcode("+0000")
     op2 = Opcode("-1000")
-
     result = op1 - op2
-
     assert result == Opcode("+1000")
 
 def test_underflow():
     op1 = Opcode("-9999")
     op2 = Opcode("+0001")
-
     result = op1 - op2
-
-    ## TODO: Undefined behavior currently. Figure this out
-
-## TODO: Write more tests
-
+    assert result == Opcode("-0000")
 
 ###################
 # Multiplication: #
@@ -188,20 +180,14 @@ def test_underflow():
 def test_mul():
     op1 = Opcode("+0000")
     op2 = Opcode("+0001")
-
     result = op1 * op2
-
     assert result == Opcode("+0000")
 
 def test_mul_neg():
     op1 = Opcode("+0001")
     op2 = Opcode("-0001")
-
     result = op1 * op2
-
     assert result == Opcode("-0001")
-
-## TODO: more tests
 
 #############
 # Division: #
@@ -209,30 +195,17 @@ def test_mul_neg():
 
 def test_integer_div():
     op = Opcode("+0004")
-
     result = op / 2
-
     assert result == Opcode("+0002")
 
 def test_opcode_div():
     op1 = Opcode("+0004")
     op2 = Opcode("+0002")
-
     result = op1 / op2
-
     assert result == Opcode("+0002")
 
 def test_opcode_div_with_remainder():
     op1 = Opcode("+0005")
     op2 = Opcode("+0002")
-
     result = op1 / op2
-
     assert result == Opcode("+0002")
-
-## TODO: As always, more tests
-
-
-
-
-    
