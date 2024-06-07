@@ -1,10 +1,25 @@
 import sys
 import os
 import pytest
+from src.cpu import CPU
+from src.memory import Memory
+from src.io_device import IODevice
 from src.opcodes import Opcode
 
 # Ensure the src directory is in the Python path for module imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
+@pytest.fixture
+def cpu():
+    return CPU()
+
+@pytest.fixture
+def memory():
+    return Memory()
+
+@pytest.fixture
+def io_device():
+    return IODevice()
 
 ##################
 # Instantiation: #
@@ -133,8 +148,8 @@ def test_add_negative_and_negative():
 def test_overflow():
     op1 = Opcode("+9999")
     op2 = Opcode("+0001")
-    result = op1 + op2
-    assert result == Opcode("+0000")
+    with pytest.raises(OverflowError):
+        result = op1 + op2
 
 ################
 # Subtraction: #
@@ -155,8 +170,8 @@ def test_subtract_a_negative():
 def test_underflow():
     op1 = Opcode("-9999")
     op2 = Opcode("+0001")
-    result = op1 - op2
-    assert result == Opcode("-10000")
+    with pytest.raises(OverflowError):
+        result = op1 - op2
 
 ###################
 # Multiplication: #

@@ -52,25 +52,37 @@ class Opcode:
 
     def __add__(self, other):
         if isinstance(other, Opcode):
-            return Opcode(f"{int(self.__raw) + int(other.__raw):+05d}")
+            result = int(self.__raw) + int(other.__raw)
+            if result > 9999 or result < -9999:
+                raise OverflowError("Resulting opcode is out of bounds")
+            return Opcode(f"{result:+05d}")
         return NotImplemented
 
     def __sub__(self, other):
         if isinstance(other, Opcode):
-            return Opcode(f"{int(self.__raw) - int(other.__raw):+05d}")
+            result = int(self.__raw) - int(other.__raw)
+            if result > 9999 or result < -9999:
+                raise OverflowError("Resulting opcode is out of bounds")
+            return Opcode(f"{result:+05d}")
         return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Opcode):
-            return Opcode(f"{int(self.__raw) * int(other.__raw):+05d}")
+            result = int(self.__raw) * int(other.__raw)
+            if result > 9999 or result < -9999:
+                raise OverflowError("Resulting opcode is out of bounds")
+            return Opcode(f"{result:+05d}")
         return NotImplemented
 
     def __truediv__(self, other):
         if isinstance(other, Opcode):
-            return Opcode(f"{int(self.__raw) // int(other.__raw):+05d}")
-        return NotImplemented
-
-    def __rtruediv__(self, other):
-        if isinstance(other, int):
-            return Opcode(f"{int(self.__raw) // other:+05d}")
+            if int(other.__raw) == 0:
+                raise ZeroDivisionError("Cannot divide by zero")
+            result = int(self.__raw) // int(other.__raw)
+            return Opcode(f"{result:+05d}")
+        elif isinstance(other, int):
+            if other == 0:
+                raise ZeroDivisionError("Cannot divide by zero")
+            result = int(self.__raw) // other
+            return Opcode(f"{result:+05d}")
         return NotImplemented
