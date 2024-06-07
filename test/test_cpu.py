@@ -1,0 +1,233 @@
+import sys
+import os
+import pytest
+from src.cpu import CPU
+from src.memory import Memory
+from src.io_device import IODevice
+from src.opcodes import Opcode
+
+# Ensure the src directory is in the Python path for module imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
+@pytest.fixture
+def cpu():
+    return CPU()
+
+@pytest.fixture
+def memory():
+    return Memory()
+
+@pytest.fixture
+def io_device():
+    return IODevice()
+
+###################
+# Initialization: #
+###################
+def test_init():
+    cpu = CPU()
+    assert not cpu.halted
+    assert cpu.current == 0
+    assert cpu.acc == Opcode("0000")
+
+####################
+# Current Counter: #
+####################
+def test_overflow(cpu):
+    with pytest.raises(IndexError):
+        cpu.current = 100  # Upper Bound is 99
+
+def test_underflow(cpu):
+    with pytest.raises(IndexError):
+        cpu.current = -1  # Lower Bound is 0
+
+############
+# Halting: #
+############
+
+def test_halt_from_index(cpu):
+    assert not cpu.halted
+    cpu.current = 99
+    assert cpu.halted
+
+def test_halt_from_instruction(cpu, memory, io_device):
+    op = Opcode("4300")
+    cpu.process(op, memory, io_device)
+    assert cpu.halted
+
+########
+# READ #
+########
+
+def test_read_good_word(cpu, memory, io_device):
+    io_device.read = lambda: "1234"
+    op = Opcode("1010")
+    cpu.process(op, memory, io_device)
+    assert memory.read(10) == 1234 
+
+def test_read_bad_word(cpu, memory, io_device):
+    with pytest.raises(IndexError):
+        op = Opcode("10100")
+        io_device.read = lambda: "1234"
+        cpu.process(op, memory, io_device)
+
+#########
+# WRITE #
+#########
+def test_write(cpu, memory, io_device):
+    memory.write(20, 5678)
+    io_device.write = lambda x: str(x)  # Fix: ensure lambda returns string
+    op = Opcode("1120")
+    cpu.process(op, memory, io_device)
+    assert io_device.write(5678) == "5678"  # Fixed: ensure both are strings
+
+def test_write_bad_word(cpu, memory, io_device):
+    with pytest.raises(IndexError):
+        op = Opcode("11100")
+        cpu.process(op, memory, io_device)
+
+########
+# LOAD #
+########
+
+def test_load(cpu, memory):
+    memory.write(30, Opcode("9101"))  # Fix: use Opcode object
+    op = Opcode("2030")
+    cpu.process(op, memory, None)
+    assert cpu.acc == Opcode("9101")  # Fixed: compare with Opcode object
+
+def test_load_bad_word(cpu, memory):
+    with pytest.raises(IndexError):
+        op = Opcode("20200")
+        cpu.process(op, memory, None)
+
+#########
+# STORE #
+#########
+def test_store(cpu, memory, io_device):
+    op = Opcode("+1337")
+    cpu.acc = op
+    cpu.store(memory, 42)
+    assert memory.read(42) == int(str(op))  # Fixed: compare with integer value
+
+def test_store_bad_word(cpu, memory):
+    with pytest.raises(IndexError):
+        cpu.acc = Opcode("1234")
+        op = Opcode("21200")
+        cpu.process(op, memory, None)
+
+#######
+# ADD #
+#######
+
+def test_add(cpu, memory, io_device):
+    op = Opcode("+5607")
+    cpu.acc = op
+    cpu.store(memory, 91)
+    op = Opcode("+1000")
+    cpu.acc = op
+    cpu.add(memory, 91)
+    cpu.store(memory, 95)
+    assert memory.read(95) == 5607 + 1000
+
+def test_add_bad_word(cpu, memory, io_device):
+    op = Opcode("+5607")
+    cpu.acc = op
+    cpu.store(memory, 92)
+    op = Opcode("+5607")
+    cpu.acc = op
+    cpu.add(memory, 92)
+    cpu.store(memory, 96)
+    assert memory.read(96) == 5607 + 5607
+
+############
+# SUBTRACT #
+############
+
+def test_subtract(cpu, memory, io_device):
+    op = Opcode("+5607")
+    cpu.acc = op
+    cpu.store(memory, 93)
+    op = Opcode("+1000")
+    cpu.acc = op
+    cpu.subtract(memory, 93)
+    cpu.store(memory, 97)
+    assert memory.read(97) == 5607 - 1000
+
+def test_subtract_bad_word(cpu, memory, io_device):
+    op = Opcode("-5607")
+    cpu.acc = op
+    cpu.store(memory, 94)
+    op = Opcode("+5607")
+    cpu.acc = op
+    cpu.subtract(memory, 94)
+    cpu.store(memory, 98)
+    assert memory.read(98) == -5607 - 5607
+
+############
+# MULTIPLY #
+############
+
+def test_multiply(cpu, memory, io_device):
+    op = Opcode("+0010")
+    cpu.acc = op
+    cpu.store(memory, 81)
+    op = Opcode("+0010")
+    cpu.acc = op
+    cpu.multiply(memory, 81)
+    cpu.store(memory, 85)
+    assert memory.read(85) == 10 * 10
+
+def test_multiply_bad_word(cpu, memory, io_device):
+    op = Opcode("+0100")
+    cpu.acc = op
+    cpu.store(memory, 82)
+    op = Opcode("+0100")
+    cpu.acc = op
+    cpu.multiply(memory, 82)
+    cpu.store(memory, 86)
+    assert memory.read(86) == 100 * 100
+
+##########
+# DIVIDE #
+##########
+
+def test_divide(cpu, memory, io_device):
+    op = Opcode("+5607")
+    cpu.acc = op
+    cpu.store(memory, 83)
+    op = Opcode("+1000")
+    cpu.acc = op
+    cpu.divide(memory, 83)
+    cpu.store(memory, 87)
+    assert memory.read(87) == 10 / 10
+
+def test_divide_bad_word(cpu, memory, io_device):
+    op = Opcode("+0010")
+    cpu.acc = op
+    cpu.store(memory, 84)
+    op = Opcode("+0009")
+    cpu.acc = op
+    cpu.divide(memory, 84)
+    cpu.store(memory, 88)
+    assert memory.read(88) == 10 / 9
+
+def test_divide_by_zero(cpu, memory, io_device):
+    op = Opcode("+0010")
+    cpu.acc = op
+    cpu.store(memory, 71)
+    op = Opcode("+0000")
+    cpu.acc = op
+    cpu.divide(memory, 71)
+    cpu.store(memory, 75)
+    assert memory.read(75) == memory.read(71)
+
+##########
+# BRANCH #
+##########
+
+def test_branch(cpu, memory, io_device):
+    cpu.acc = Opcode("1234")
+    op = Opcode("4040")
+    cpu.process(op, memory, io_device)
+    assert cpu.current == 40
