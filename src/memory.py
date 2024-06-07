@@ -4,13 +4,15 @@ from src.opcode import Opcode
 
 class Memory:
     """
-    An abstraction representing the Memory of the UVSim virtual manchine
+    An abstraction representing the Memory of the UVSim virtual machine.
     """
 
     def __init__(self, size = 100):
         """
         Create a new memory array for a UVSim virtual machine.
+        Initializes memory with 100 words, each initialized to 0.
         """
+
         self.__mem = [Opcode("+0000")] * size
 
         
@@ -29,18 +31,23 @@ class Memory:
     @property
     def mem(self):
         """
-        Get the memory
+        Get the memory.
         """
         return self.__mem
-        
-    
+
 
     def write(self, value, address):
         """
         Set the value (should be a signed opcode/number) at a specific index.
+        
+        Args:
+            address (int): The memory address to write to.
+            value (int): The value to write at the specified address.
 
-        If the memory has not yet been allocated, create it.
+        Raises:
+            IndexError: If the address is out of bounds.
         """
+
         error_message = "Error while writing."
         self._validate_value(value, error_message)
         self._validate_address(address, error_message)
@@ -58,15 +65,18 @@ class Memory:
     @property
     def __next(self):
         """
-        Return the index of the next unallocated piece of memory
-
-        e.g. ['+1000', '-1000', '+1234'] has a next available address at index 3
+        Return the index of the next unallocated piece of memory.
+        
+        Returns:
+            int: The index of the next available address.
         """
         self._validate_address(len(self), "Memory full.")
         return len(self)
     
     def writenext(self, value):
+
         #self.write(value, self.__next)
         self._validate_value(value, "Error while writing next.")
         self._validate_address(self.__next, "Error while writing next.")
         self.__mem[self.__next] = value
+
