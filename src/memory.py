@@ -20,10 +20,12 @@ class Memory:
 
 
     def _validate_address(self, address, error_message):
+        '''Validate the address to ensure it is within the boundaries of the memory array.'''
         if address < 0 or address > 99:
             raise ValueError(f"Memory location \"{address}\" is out of boundaries (0-99). {error_message}")
 
     def _validate_value(self, value, error_message):
+        '''Validate the value to ensure it is an instance of Opcode.'''
         if not isinstance(value, Opcode):
             raise TypeError(f"Expected an Opcode, got \"{type(value)}\" as valued entered. {error_message}")
 
@@ -37,16 +39,10 @@ class Memory:
 
     def write(self, value, address):
         """
-        Set the value (should be a signed opcode/number) at a specific index.
-        
+        Set the value (should be a signed opcode) at a specific index.
         Args:
-            address (int): The memory address to write to.
-            value (int): The value to write at the specified address.
-
-        Raises:
-            IndexError: If the address is out of bounds.
-        """
-
+            value (Opcode): The opcode to write at the specified address.
+            address (int): The memory address to write to."""
         error_message = "Error while writing."
         self._validate_value(value, error_message)
         self._validate_address(address, error_message)
@@ -56,6 +52,7 @@ class Memory:
     
     
     def read(self, address):
+        '''Read the value at the specified address. Raises error if invalid address is provided.'''
         error_message = "Error while reading."
         self._validate_address(address, error_message)
         print(self.__mem[address])
@@ -65,10 +62,11 @@ class Memory:
     def __next(self):
         """
         Return the index of the next unallocated piece of memory.
-        
+
         Returns:
             int: The index of the next available address.
         """
+        #this is the method that is not recognized on the pytest
         counter = 0
         for opcode_slot in self.__mem:
             if opcode_slot.__raw == Opcode("+0000").__raw:
@@ -77,7 +75,7 @@ class Memory:
         raise ValueError("Memory is full.")
     
     def writenext(self, value):
-
+        '''calls the next property to input in the write method.'''
         self.write(value, self.__next)
         self._validate_value(value, "Error while writing next.")
         self._validate_address(self.__next, "Error while writing next.")
