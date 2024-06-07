@@ -83,9 +83,9 @@ class CPU:
 
         match opcode.name:
             case "READ":
-                self.read(memory, opcode.operand, iodevice)
+                self.read(memory, opcode.operand, io_device)
             case "WRITE":
-                self.write(memory, opcode.operand, iodevice)
+                self.write(memory, opcode.operand, io_device)
             case "LOAD":
                 self.load(memory, opcode.operand)
             case "STORE":
@@ -153,17 +153,36 @@ class CPU:
         """
         memory.write(address, self.acc)
 
+    
     def add(self, memory, address):
-        pass
+        self.acc += memory.read(address)
+
+        if self.acc > 9999 and self.acc < -9999:
+            self.acc = self.acc % 10000
+            raise "The values added were greater than storage capacity.  Maintaining the last four digits."
+
 
     def subtract(self, memory, address):
-        pass
+        self.acc -= memory.read(address)
+
+        if self.acc > 9999 and self.acc < -9999:
+            self.acc = self.acc % 10000
+            raise "The values subtracted were greater than storage capacity.  Maintaining the last four digits."
+
 
     def multiply(self, memory, address):
-        pass
+        self.acc *= memory.read(address)
+
+        if self.acc > 9999 and self.acc < -9999:
+            self.acc = self.acc % 10000
+            raise "The values multiplied were greater than storage capacity.  Maintaining the last four digits."
 
     def divide(self, memory, address):
-        pass
+        if memory.read(address) != 0:
+            self.acc //= memory.read(address)
+        else:
+            raise "The value stored in memory is 0."
+        
 
     def branch(self, memory, address):
         pass
