@@ -41,11 +41,29 @@ class Opcode:
     
     def __str__(self):
         return self.__raw
-    
+   
+    # NEW CHANGES BELOW
+    def __eq__(self, other):
+        if isinstance(other, Opcode):
+            return self.__raw == other.__raw
+        return False
 
+    def __add__(self, other):
+        if isinstance(other, Opcode):
+            return Opcode(f"{int(self.__raw) + int(other.__raw):+05d}")
+        return NotImplemented
 
+    def __sub__(self, other):
+        if isinstance(other, Opcode):
+            return Opcode(f"{int(self.__raw) - int(other.__raw):+05d}")
+        return NotImplemented
 
+    def __mul__(self, other):
+        if isinstance(other, Opcode):
+            return Opcode(f"{int(self.__raw) * int(other.__raw):+05d}")
+        return NotImplemented
 
-
-
-    
+    def __truediv__(self, other):
+        if isinstance(other, Opcode):
+            return Opcode(f"{int(self.__raw) // int(other.__raw):+05d}")
+        return NotImplemented
