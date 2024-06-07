@@ -130,7 +130,10 @@ class CPU:
             raise "The values multiplied were greater than storage capacity.  Maintaining the last four digits."
 
     def divide(self, memory, address):
-        self.acc //= memory.read(address)
+        if memory.read(address) != 0:
+            self.acc //= memory.read(address)
+        else:
+            raise "The value stored in memory is 0."
         
 
     def branch(self, memory, address):
