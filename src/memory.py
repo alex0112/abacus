@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-from src.opcode import Opcode
-
+from src.opcodes import Opcode
 
 class Memory:
     """
@@ -70,12 +69,16 @@ class Memory:
         Returns:
             int: The index of the next available address.
         """
-        self._validate_address(len(self), "Memory full.")
-        return len(self)
+        counter = 0
+        for opcode_slot in self.__mem:
+            if opcode_slot.__raw == Opcode("+0000").__raw:
+                return counter
+            counter += 1
+        raise ValueError("Memory is full.")
     
     def writenext(self, value):
 
-        #self.write(value, self.__next)
+        self.write(value, self.__next)
         self._validate_value(value, "Error while writing next.")
         self._validate_address(self.__next, "Error while writing next.")
         self.__mem[self.__next] = value
