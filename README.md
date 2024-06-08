@@ -13,6 +13,9 @@ UVSim Virtual Machine
 - Other Documents: 
   - This README (you're reading it)
   - Meeting notes can be found in the `Milestone_2/`
+ 
+### Contributors
+All five members of the project contributed some code (although this is not reflected in the commits currently). The best way to see how tasks were divided is by referencing the issues page. 
 
 ## Running the Program
 
