@@ -4,13 +4,15 @@ class Opcode:
     or at least conforms to the format of a signed four digit base ten number'''
 
     def __init__(self, raw):
+        raw = raw.strip()
+
         if not raw:
             raise ValueError("Opcode cannot be empty")
         if raw[0] not in ['-', '+']:
             # Prepend a + sign if the first character is not a sign
             raw = '+' + raw
         if not raw[1:].isdigit() or len(raw[1:]) != 4:
-            raise ValueError("Opcode must be 4 digits")
+            raise ValueError(f"Could not make opcode from {raw}. Opcode must be 4 digits")
         self.__raw = raw
         self.__sign = ""
         self.__op_list = {
