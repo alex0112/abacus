@@ -3,7 +3,7 @@
 from src.cpu import CPU
 from src.memory import Memory
 from src.io_device import IODevice
-from src.opcode import Opcode
+from src.opcodes import Opcode
 
 class UVSim:
     """

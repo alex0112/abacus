@@ -22,7 +22,7 @@ class Memory:
         """
         return self.__mem
 
-    def write(self, value, address):
+    def write(self, address, value):
         """
         Set the value (should be a signed opcode/number) at a specific index.
         
@@ -33,7 +33,6 @@ class Memory:
         Raises:
             IndexError: If the address is out of bounds.
         """
-
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
         self.__mem[address] = value
@@ -54,9 +53,6 @@ class Memory:
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
         return self.__mem[address]
-
-    def read(self, address):
-        return self.__mem[address]
         
     @property
     def __next(self):
@@ -66,7 +62,10 @@ class Memory:
         Returns:
             int: The index of the next available address.
         """
-        return len(self.mem)
+        for i, value in enumerate(self.__mem):
+            if value == 0:
+                return i
+        return len(self.__mem)
 
     def writenext(self, value):
         """
@@ -74,5 +73,11 @@ class Memory:
         
         Args:
             value (int): The value to write at the next available address.
+
+        Raises:
+            IndexError: If there is no available memory address.
         """
-        self.write(self.__next, value)
+        next_addr = self.__next
+        if next_addr >= len(self.__mem):
+            raise IndexError("No available memory address")
+        self.write(next_addr, value)
