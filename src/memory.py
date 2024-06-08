@@ -37,7 +37,9 @@ class Memory:
         return self.__mem
 
 
+
     def write(self, value, address):
+
         """
         Set the value (should be a signed opcode) at a specific index.
         Args:
@@ -56,6 +58,7 @@ class Memory:
         error_message = "Error while reading."
         self._validate_address(address, error_message)
         print(self.__mem[address])
+
         return self.__mem[address]
         
     @property
@@ -80,4 +83,5 @@ class Memory:
         self._validate_value(value, "Error while writing next.")
         self._validate_address(self.__next, "Error while writing next.")
         self.__mem[self.__next] = value
+
 
