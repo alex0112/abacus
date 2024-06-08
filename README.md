@@ -4,6 +4,15 @@ UVSim Virtual Machine
 
 ![image](https://github.com/alex0112/abacus/assets/7142972/ea29fa8f-236c-4a23-92a1-361781afffa1)
 
+## Milestone 2 Submission:
+
+- Design Document: Our design document can be found in the `Milestone_2/` directory. Additionally we describe additional program design in [ARCH.md](https://github.com/alex0112/abacus/blob/main/ARCH.md).
+- Working Prototype: This repository.
+- Unit Tests: Tests can be found in `test/` and run with `pytest`. See the tests section below for more details.
+  - Table of test cases can be found in the `Milestone_2/` directory
+- Other Documents: 
+  - This README (you're reading it)
+  - Meeting notes can be found in the `Milestone_2/`
 
 ## Running the Program
 
