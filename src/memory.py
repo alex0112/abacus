@@ -22,7 +22,7 @@ class Memory:
     def _validate_address(self, address, error_message):
         '''Validate the address to ensure it is within the boundaries of the memory array.'''
         if address < 0 or address > 99:
-            raise ValueError(f"Memory location \"{address}\" is out of boundaries (0-99). {error_message}")
+            raise IndexError(f"Memory location \"{address}\" is out of boundaries (0-99). {error_message}")
 
     def _validate_value(self, value, error_message):
         '''Validate the value to ensure it is an instance of Opcode.'''
@@ -38,7 +38,7 @@ class Memory:
 
 
 
-    def write(self, value, address):
+    def write(self, address, value):
 
         """
         Set the value (should be a signed opcode) at a specific index.
@@ -57,12 +57,10 @@ class Memory:
         '''Read the value at the specified address. Raises error if invalid address is provided.'''
         error_message = "Error while reading."
         self._validate_address(address, error_message)
-        print(self.__mem[address])
-
-        return self.__mem[address]
+        return int(str(self.__mem[address]))
         
     @property
-    def __next(self):
+    def next(self):
         """
         Return the index of the next unallocated piece of memory.
 
@@ -72,16 +70,13 @@ class Memory:
         #this is the method that is not recognized on the pytest
         counter = 0
         for opcode_slot in self.__mem:
-            if opcode_slot.__raw == Opcode("+0000").__raw:
+            if str(opcode_slot) == Opcode("+0000").__str__():
                 return counter
             counter += 1
         raise ValueError("Memory is full.")
-    
     def writenext(self, value):
         '''calls the next property to input in the write method.'''
-        self.write(value, self.__next)
-        self._validate_value(value, "Error while writing next.")
-        self._validate_address(self.__next, "Error while writing next.")
-        self.__mem[self.__next] = value
+        self.write(self.next, value)
+        self.__mem[self.next] = value
 
 
