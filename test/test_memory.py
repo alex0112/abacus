@@ -4,7 +4,7 @@ import pytest
 from src.cpu import CPU
 from src.memory import Memory
 from src.io_device import IODevice
-# from src.opcodes import Opcode
+from src.opcodes import Opcode
 
 # Ensure the src directory is in the Python path for module imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
@@ -32,7 +32,7 @@ def test_init_from_list():
     mem = Memory()
     mem.write(0, -1234)
     assert mem.read(0) == -1234
-
+a
 def test_bad_init_from_list():
     mem = Memory()
     with pytest.raises(IndexError):
@@ -67,3 +67,7 @@ def test_writenext():
     memory.write(2, 8910)
     memory.writenext(1112)
     assert memory.read(3) == 1112
+    
+def test_next():
+    memory = Memory()
+    memory.write(0, 1234)
