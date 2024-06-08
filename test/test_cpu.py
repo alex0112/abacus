@@ -173,11 +173,26 @@ def test_multiply_bad_word(cpu, memory, io_device):
 ##########
 
 def test_divide(cpu, memory, io_device):
-    cpu.acc = Opcode("1234")
-    memory.write(70, Opcode("0002"))
-    op = Opcode("3370")
-    cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("+0617")
+    op1 = Opcode("+0004")
+    op2 = Opcode("+0002")
+
+    cpu.acc = op1
+    memory.write(42, op2)
+
+    cpu.divide(memory, 42)
+
+    assert cpu.acc == Opcode("+0002")
+
+def test_divide_rem(cpu, memory, io_device):
+    op1 = Opcode("+0005")
+    op2 = Opcode("+0002")
+
+    cpu.acc = op1
+    memory.write(42, op2)
+
+    cpu.divide(memory, 42)
+
+    assert cpu.acc == Opcode("+0002")
 
 def test_divide_bad_word(cpu, memory, io_device):
     with pytest.raises(ValueError):
@@ -185,11 +200,14 @@ def test_divide_bad_word(cpu, memory, io_device):
         cpu.process(op, memory, None)
 
 def test_divide_by_zero(cpu, memory, io_device):
-    cpu.acc = Opcode("1234")
-    memory.write(80, Opcode("0000"))
-    op = Opcode("3380")
+    op1 = Opcode("+0009")
+    op2 = Opcode("+0000")
+
+    cpu.acc = op1
+    memory.write(42, op2)
+
     with pytest.raises(ZeroDivisionError):
-        cpu.process(op, memory, None)
+        cpu.divide(memory, 42)
 
 ##########
 # BRANCH #
