@@ -26,10 +26,17 @@ It expects a program written in BasicML.
 
 The program works best with `Python 3.12.0`. The official release for which can be found [here](https://www.python.org/downloads/release/python-3120/)
 
+Since this is prototype, the program will log the current instruction to the console as it is processed:
+
+![image](https://github.com/alex0112/abacus/assets/7142972/482003db-02ac-4a86-9197-ae476f5c9cd4)
+
 ### Tests
 Testing is handled through pytest. In order to ensure that the correct version of pytest is installed install the dependencies with `pip install -r requirements.txt`
 
-At that point you should be able to run the tests from the root directory of this project with `make test` (on UNIX based systems) or by simply called `pytest` directly.
+At that point you should be able to run the tests from the root directory of this project with `make test` (on UNIX based systems) or by simply called `pytest` directly:
+
+![image](https://github.com/alex0112/abacus/assets/7142972/0012a128-abf8-4718-836d-b62dfdd1bfa6)
+
 
 ### Demo
 In order to run a basic program (examples can be found in the `bml_examples/` directory) run
