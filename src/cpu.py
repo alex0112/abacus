@@ -116,6 +116,7 @@ class CPU:
             io_device (IODevice): The I/O device used for reading input.
             address (int): The memory address where the input data will be stored.
         """
+        print(f"READ {address}")
         data = int(io_device.read())  # Ensure data is integer
         memory.write(address, data)
 
@@ -128,6 +129,7 @@ class CPU:
             io_device (IODevice): The I/O device used for writing output.
             address (int): The memory address from which the data will be read.
         """
+        print(f"WRITE {address}")
         data = memory.read(address)
         io_device.write(data)
 
@@ -139,6 +141,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be loaded into the accumulator.
         """
+        print(f"LOAD {address}")
         self.acc = memory.read(address)
 
     def store(self, memory, address):
@@ -149,6 +152,7 @@ class CPU:
             memory (Memory): The memory object where data will be written.
             address (int): The memory address where the accumulator data will be stored.
         """
+        print(f"STORE {address}")
         memory.write(address, int(str(self.acc)))  # Ensure acc is written as integer
 
     def add(self, memory, address):
@@ -158,6 +162,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be added to the accumulator.
         """
+        print(f"ADD {address}")
         operand = int(str(memory.read(address)))
         self.acc = Opcode(f"{int(str(self.acc)) + operand:+05d}")
 
@@ -168,6 +173,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be subtracted from the accumulator.
         """
+        print(f"SUBTRACT {address}")
         operand = int(str(memory.read(address)))
         self.acc = Opcode(f"{int(str(self.acc)) - operand:+05d}")
 
@@ -178,6 +184,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be multiplied with the accumulator.
         """
+        print(f"MULTIPLY {address}")
         operand = int(str(memory.read(address)))
         self.acc = Opcode(f"{int(str(self.acc)) * operand:+05d}")
 
@@ -188,6 +195,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be used to divide the accumulator.
         """
+        print(f"DIVIDE {address}")
         divisor = int(str(memory.read(address)))
         if divisor == 0:
             raise ZeroDivisionError("Cannot divide by zero")
@@ -201,6 +209,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
+        print(f"BRANCH {address}")
         self.current = address
 
     def branchneg(self, memory, address):
@@ -211,6 +220,7 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
+        print(f"BRANCHNEG {address}")
         if int(str(self.acc)) < 0:
             self.current = address
 
@@ -222,10 +232,12 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
+        print(f"BRANCHZERO {address}")
         if int(str(self.acc)) == 0:
             self.current = address
 
     def halt(self):
+        print(f"HALT")
         self.halted = True
 
     def noop(self):
