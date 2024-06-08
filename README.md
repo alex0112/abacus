@@ -2,6 +2,9 @@
 
 UVSim Virtual Machine
 
+![image](https://github.com/alex0112/abacus/assets/7142972/ea29fa8f-236c-4a23-92a1-361781afffa1)
+
+
 ## Running the Program
 
 The most basic invocation of the program is:
