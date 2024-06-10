@@ -36,7 +36,7 @@ Since this is prototype, the program will log the current instruction to the con
 ### Tests
 Testing is handled through pytest. In order to ensure that the correct version of pytest is installed install the dependencies with `pip install -r requirements.txt`
 
-At that point you should be able to run the tests from the root directory of this project with `make test` (on UNIX based systems) or by simply called `pytest` directly:
+At that point you should be able to run the tests from the root directory of this project with `make test` (on UNIX based systems) or by simply calling `pytest` directly:
 
 ![image](https://github.com/alex0112/abacus/assets/7142972/0012a128-abf8-4718-836d-b62dfdd1bfa6)
 
