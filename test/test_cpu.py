@@ -212,9 +212,43 @@ def test_divide_by_zero(cpu, memory, io_device):
 ##########
 # BRANCH #
 ##########
-
-def test_branch(cpu, memory, io_device):
+def test_branch(cpu):
     cpu.acc = Opcode("1234")
-    op = Opcode("4040")
-    cpu.process(op, memory, io_device)
-    assert cpu.current == 40
+    cpu.branch(42)
+
+    assert cpu.current == 42
+
+##############
+# BRANCHZERO #
+##############
+def test_branchzero_no_zero(cpu):
+    cpu.acc = Opcode("1234")
+    cpu.current = 0
+    cpu.branchzero(42)
+
+    assert cpu.current != 42
+
+def test_branchzero_with_zero(cpu):
+    cpu.acc = Opcode("0000")
+    cpu.current = 0
+    cpu.branchzero(42)
+
+    assert cpu.current == 42
+
+#############
+# BRANCHNEG #
+#############
+def test_branchneg_non_neg(cpu):
+    cpu.acc = Opcode("0001")
+    cpu.current = 0
+    cpu.branchneg(42)
+
+    assert cpu.current != 42
+
+def test_branchneg_is_neg(cpu):
+    cpu.acc = Opcode("-0001")
+    cpu.current = 0
+    cpu.branchneg(42)
+
+    assert cpu.current == 42
+
