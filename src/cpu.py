@@ -81,27 +81,27 @@ class CPU:
 
         match opcode.name:
             case "READ":
-                self.read(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.read(memory, io_device, int(opcode.operand))
             case "WRITE":
-                self.write(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.write(memory, io_device, int(opcode.operand))
             case "LOAD":
-                self.load(memory, int(opcode.operand))  # Cast operand to int
+                self.load(memory, int(opcode.operand))
             case "STORE":
-                self.store(memory, int(opcode.operand))  # Cast operand to int
+                self.store(memory, int(opcode.operand))
             case "ADD":
-                self.add(memory, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.add(memory, int(opcode.operand))
             case "SUBTRACT":
-                self.subtract(memory, int(opcode.operand))  # Cast operand to int
+                self.subtract(memory, int(opcode.operand))
             case "MULTIPLY":
-                self.multiply(memory, int(opcode.operand))  # Cast operand to int
+                self.multiply(memory, int(opcode.operand))
             case "DIVIDE":
-                self.divide(memory, int(opcode.operand))  # Cast operand to int
+                self.divide(memory, int(opcode.operand))
             case "BRANCH":
-                self.branch(memory, int(opcode.operand))  # Cast operand to int
+                self.branch(memory, int(opcode.operand))
             case "BRANCHNEG":
-                self.branchneg(memory, int(opcode.operand))  # Cast operand to int
+                self.branchneg(memory, int(opcode.operand))
             case "BRANCHZERO":
-                self.branchzero(memory, int(opcode.operand))  # Cast operand to int
+                self.branchzero(memory, int(opcode.operand))
             case "HALT":
                 self.halt()
             case _:
