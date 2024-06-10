@@ -201,18 +201,17 @@ class CPU:
             raise ZeroDivisionError("Cannot divide by zero")
         self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
 
-    def branch(self, memory, address):
+    def branch(self, address):
         """
         Branch to a specific location in memory.
         
         Args:
-            memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
         print(f"BRANCH {address}")
         self.current = address
 
-    def branchneg(self, memory, address):
+    def branchneg(self, address):
         """
         Branch to a specific location in memory if the accumulator is negative.
         
@@ -224,7 +223,7 @@ class CPU:
         if int(str(self.acc)) < 0:
             self.current = address
 
-    def branchzero(self, memory, address):
+    def branchzero(self, address):
         """
         Branch to a specific location in memory if the accumulator is zero.
         
