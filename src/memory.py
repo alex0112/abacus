@@ -1,19 +1,33 @@
 #!/usr/bin/env python3
+from src.opcodes import Opcode
 
 class Memory:
     """
     An abstraction representing the Memory of the UVSim virtual machine.
     """
 
-    def __init__(self):
+    def __init__(self, size = 100):
         """
         Create a new memory array for a UVSim virtual machine.
         Initializes memory with 100 words, each initialized to 0.
         """
-        self.__mem = [0] * 100  # Assuming memory size is 100 words
+
+        self.__mem = [Opcode("+0000")] * size
+
         
     def __len__(self):
         return len(self.__mem)
+
+
+    def _validate_address(self, address, error_message):
+        '''Validate the address to ensure it is within the boundaries of the memory array.'''
+        if address < 0 or address > 99:
+            raise IndexError(f"Memory location \"{address}\" is out of boundaries (0-99). {error_message}")
+
+    def _validate_value(self, value, error_message):
+        '''Validate the value to ensure it is an instance of Opcode.'''
+        if not isinstance(value, Opcode):
+            raise TypeError(f"Expected an Opcode, got \"{type(value)}\" as valued entered. {error_message}")
 
     @property
     def mem(self):
@@ -22,62 +36,47 @@ class Memory:
         """
         return self.__mem
 
+
+
     def write(self, address, value):
-        """
-        Set the value (should be a signed opcode/number) at a specific index.
-        
-        Args:
-            address (int): The memory address to write to.
-            value (int): The value to write at the specified address.
 
-        Raises:
-            IndexError: If the address is out of bounds.
         """
-        if address < 0 or address >= len(self.__mem):
-            raise IndexError("Memory address out of range")
+        Set the value (should be a signed opcode) at a specific index.
+        Args:
+            value (Opcode): The opcode to write at the specified address.
+            address (int): The memory address to write to."""
+        error_message = "Error while writing."
+        self._validate_value(value, error_message)
+        self._validate_address(address, error_message)
+        if len(self) == 0 & address == 0:
+            self.__mem.append(value)
         self.__mem[address] = value
-
+    
+    
     def read(self, address):
-        """
-        Get the value at a specific index.
-        
-        Args:
-            address (int): The memory address to read from.
-
-        Returns:
-            int: The value at the specified address.
-
-        Raises:
-            IndexError: If the address is out of bounds.
-        """
-        if address < 0 or address >= len(self.__mem):
-            raise IndexError("Memory address out of range")
-        return self.__mem[address]
+        '''Read the value at the specified address. Raises error if invalid address is provided.'''
+        error_message = "Error while reading."
+        self._validate_address(address, error_message)
+        return int(str(self.__mem[address]))
         
     @property
-    def __next(self):
+    def next(self):
         """
         Return the index of the next unallocated piece of memory.
-        
+
         Returns:
             int: The index of the next available address.
         """
-        for i, value in enumerate(self.__mem):
-            if value == 0:
-                return i
-        return len(self.__mem)
-
+        #this is the method that is not recognized on the pytest
+        counter = 0
+        for opcode_slot in self.__mem:
+            if str(opcode_slot) == Opcode("+0000").__str__():
+                return counter
+            counter += 1
+        raise ValueError("Memory is full.")
     def writenext(self, value):
-        """
-        Write the value at the next available address.
-        
-        Args:
-            value (int): The value to write at the next available address.
+        '''calls the next property to input in the write method.'''
+        self.write(self.next, value)
+        self.__mem[self.next] = value
 
-        Raises:
-            IndexError: If there is no available memory address.
-        """
-        next_addr = self.__next
-        if next_addr >= len(self.__mem):
-            raise IndexError("No available memory address")
-        self.write(next_addr, value)
+
