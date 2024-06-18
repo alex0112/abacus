@@ -12,7 +12,6 @@ class CPU:
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.
         """
-
         self.__acc = Opcode("0000")
         self.__current = 0  # Where to start executing the program.
         self.__halted = False  # Whether or not the current execution should stop
@@ -54,6 +53,9 @@ class CPU:
         self.__halted = val
 
     def run(self, memory, io_device, address=0):
+        """
+        Run the simulation starting from the given address.
+        """
         self.current = address
 
         while not self.halted:
@@ -78,7 +80,6 @@ class CPU:
             ValueError: If an unknown opcode is encountered.
             IndexError: If the address is out of bounds.
         """
-
         match opcode.name:
             case "READ":
                 self.read(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
@@ -242,3 +243,14 @@ class CPU:
 
     def noop(self):
         pass
+
+    def step(self, memory, io_device):
+        """
+        Execute a single instruction.
+        """
+        if self.current > len(memory) - 1 or len(memory) == 0:
+            self.halted = True
+        else:
+            current_opcode = memory.read(self.current)
+            self.process(current_opcode, memory, io_device)
+            self.current += 1
