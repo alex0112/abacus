@@ -88,3 +88,15 @@ class Opcode:
             result = int(self.__raw) // other
             return Opcode(f"{result:+05d}")
         return NotImplemented
+    
+    def __lt__(self):
+        pass
+
+    def __gt__(self):
+        pass
+
+    def __le__(self):
+        pass
+
+    def __ge__(self):
+        pass
