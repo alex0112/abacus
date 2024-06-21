@@ -209,3 +209,26 @@ def test_opcode_div_with_remainder():
     op2 = Opcode("+0002")
     result = op1 / op2
     assert result == Opcode("+0002")
+
+
+#############
+# Overflow: #
+#############
+
+def test_overflow():
+    op1 = Opcode("+9999")
+    op2 = Opcode("+0002")
+
+    result = op1 + op2
+
+    assert result == Opcode("+0001")
+
+def test_underflow():
+    op1 = Opcode("-9999")
+    op2 = Opcode("+0002")
+
+    result = op1 - op2
+
+    assert result == Opcode("-0001")
+
+    

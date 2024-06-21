@@ -46,6 +46,24 @@ class Opcode:
     def __str__(self):
         return self.__raw
 
+    @staticmethod
+    def __overflow(raw_integer):
+        """
+        The behavior implemented here should define how an Opcode is expected to handle overflow or underflow behavior
+
+        The current specification is:
+        "Truncate overflows (so same sign, just drop the extra digits, keep the last four)"
+        """
+        raw_string = f"{raw_integer:+05d}"
+
+        if raw_integer > 9999 or raw_integer < -9999:
+            truncated = raw_string[:-4] ## Grab the last four digits
+            sign      = raw_string[0]
+
+            return Opcode(f"{int(truncated):+05d}")
+        else:
+            return Opcode(raw_string)
+            
     # Implementing equality and arithmetic operations
     def __eq__(self, other):
         if isinstance(other, Opcode):
@@ -55,25 +73,22 @@ class Opcode:
     def __add__(self, other):
         if isinstance(other, Opcode):
             result = int(self.__raw) + int(other.__raw)
-            if result > 9999 or result < -9999:
-                raise OverflowError("Resulting opcode is out of bounds")
-            return Opcode(f"{result:+05d}")
+            return Opcode.__overflow(result)
+
         return NotImplemented
 
     def __sub__(self, other):
         if isinstance(other, Opcode):
             result = int(self.__raw) - int(other.__raw)
-            if result > 9999 or result < -9999:
-                raise OverflowError("Resulting opcode is out of bounds")
-            return Opcode(f"{result:+05d}")
+            return Opcode.__overflow(result)
+
         return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Opcode):
             result = int(self.__raw) * int(other.__raw)
-            if result > 9999 or result < -9999:
-                raise OverflowError("Resulting opcode is out of bounds")
-            return Opcode(f"{result:+05d}")
+            return Opcode.__overflow(result)
+
         return NotImplemented
 
     def __truediv__(self, other):
@@ -81,12 +96,14 @@ class Opcode:
             if int(other.__raw) == 0:
                 raise ZeroDivisionError("Cannot divide by zero")
             result = int(self.__raw) // int(other.__raw)
-            return Opcode(f"{result:+05d}")
+            return Opcode.__overflow(result)
+
         elif isinstance(other, int):
             if other == 0:
                 raise ZeroDivisionError("Cannot divide by zero")
             result = int(self.__raw) // other
-            return Opcode(f"{result:+05d}")
+            return Opcode.__overflow(result)
+
         return NotImplemented
     
     def __lt__(self, other):
