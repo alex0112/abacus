@@ -88,3 +88,27 @@ class Opcode:
             result = int(self.__raw) // other
             return Opcode(f"{result:+05d}")
         return NotImplemented
+    
+    def __lt__(self, other):
+        if isinstance(other, Opcode):
+            return int(self.__raw) < int(other.__raw)
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Opcode):
+            return int(self.__raw) > int(other.__raw)
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, Opcode):
+            return int(self.__raw) <= int(other.__raw)
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, Opcode):
+            return int(self.__raw) >= int(other.__raw)
+        return NotImplemented
+
+
+
+
