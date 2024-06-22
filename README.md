@@ -77,6 +77,8 @@ The most basic invocation of the program is:
 ```
 python3 gui.py
 ```
+It expects a text file written in BasicML as an input to execute instructions. 
+For further help on how to operate the GUI, click on HELP button on the bottom right of the window.
 
 Check out the GUI Design Document here for further clarification: [Lucidchart Document](https://lucid.app/lucidchart/b264f5ba-3940-4e0d-82eb-cbf5a60dc4c8/edit?beaconFlowId=849C5C87E8B614FA&invitationId=inv_2d225cf5-c67a-4421-bf40-98fd634af577&page=0_0#).
 
@@ -177,9 +179,6 @@ The Help / Instructions page covers the following topics:
 
 ### Current Instruction Panel:
 - The current instruction panel should be updated to reflect the instruction being executed.
-
-### User Input Handling:
-- Properly handle user input for READ operations and update the input panel accordingly.
 
 ### Debugging and Error Handling:
 - Ensure all components handle errors gracefully, with appropriate messages displayed to the user.
