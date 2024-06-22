@@ -29,7 +29,7 @@
 
 1. Store Write command in memory
 2. Load Write command to CPU accumulator
-3. Execute Write command to send data from I/O device
+3. Execute Write command to send data from I/O device and store result in accumulator
 
 **Use Case 3: Load**
 
