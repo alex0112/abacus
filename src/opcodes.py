@@ -13,6 +13,12 @@ class Opcode:
             raw = '+' + raw
         if not raw[1:].isdigit() or len(raw[1:]) != 4:
             raise ValueError(f"Could not make opcode from {raw}. Opcode must be 4 digits")
+
+        try:
+            self.__numeric = int(raw)
+        except ValueError:
+            raise ValueError(f"Could not make opcode from {raw}. Opcode must be 4 digits")
+
         self.__raw = raw
         self.__sign = ""
         self.__op_list = {
@@ -48,6 +54,10 @@ class Opcode:
     def raw(self):
         return self.__raw
 
+    @property
+    def numeric(self):
+        return self.__numeric
+
     def __str__(self):
         return self.__raw
 
@@ -59,7 +69,7 @@ class Opcode:
         The current specification is:
         "Truncate overflows (so same sign, just drop the extra digits, keep the last four)"
         """
-        raw_string = f"{raw_integer:+05d}"
+        raw_string = f"{int(raw_integer):+05d}"
 
         if raw_integer > 9999 or raw_integer < -9999:
             truncated = raw_string[:-4] ## Grab the last four digits
@@ -71,64 +81,95 @@ class Opcode:
             
     def __eq__(self, other):
         if isinstance(other, Opcode):
-            return self.raw == other.raw
+            return self.numeric == other.numeric
         if isinstance(other, int):
-            return self.raw == other
+            return self.numeric == other
 
         return False
 
     def __add__(self, other):
         if isinstance(other, Opcode):
-            result = int(self.__raw) + int(other.__raw)
+            result = self.numeric + other.numeric
             return Opcode.__overflow(result)
 
         return NotImplemented
 
     def __sub__(self, other):
         if isinstance(other, Opcode):
-            result = int(self.__raw) - int(other.__raw)
+            result = self.numeric - other.numeric
             return Opcode.__overflow(result)
 
         return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, Opcode):
-            result = int(self.__raw) * int(other.__raw)
+            result = self.numeric * other.numeric
             return Opcode.__overflow(result)
 
         return NotImplemented
 
     def __truediv__(self, other):
         if isinstance(other, Opcode):
-            if int(other.__raw) == 0:
+            if other.numeric == 0:
                 raise ZeroDivisionError("Cannot divide by zero")
-            result = int(self.__raw) // int(other.__raw)
-            return Opcode.__overflow(result)
-
         elif isinstance(other, int):
             if other == 0:
                 raise ZeroDivisionError("Cannot divide by zero")
-            result = int(self.__raw) // other
+            
+        if isinstance(other, Opcode):
+            result = self.numeric // other.numeric
             return Opcode.__overflow(result)
+        elif isinstance(other, int):
+            result = self.numeric // other
+            return Opcode.__overflow(result)
+            
+        return NotImplemented
 
+    def __floordiv__(self, other):
+        if isinstance(other, Opcode):
+            if other.numeric == 0:
+                raise ZeroDivisionError("Cannot divide by zero")
+        elif isinstance(other, int):
+            if other == 0:
+                raise ZeroDivisionError("Cannot divide by zero")
+            
+        if isinstance(other, Opcode):
+            result = self.numeric // other.numeric
+            return Opcode.__overflow(result)
+        elif isinstance(other, int):
+            result = self.numeric // other
+            return Opcode.__overflow(result)
+            
         return NotImplemented
     
     def __lt__(self, other):
         if isinstance(other, Opcode):
-            return int(self.__raw) < int(other.__raw)
+            return int(self.numeric) < other.numeric
+        elif isinstance(other, int):
+            return self.numeric < other
+
         return NotImplemented
 
     def __gt__(self, other):
         if isinstance(other, Opcode):
-            return int(self.__raw) > int(other.__raw)
+            return self.numeric > other.numeric
+        elif isinstance(other, int):
+            return self.numeric > other
+
         return NotImplemented
 
     def __le__(self, other):
         if isinstance(other, Opcode):
-            return int(self.__raw) <= int(other.__raw)
+            return int(self.numeric) <= other.numeric
+        elif isinstance(other, int):
+            return self.numeric <= other
+
         return NotImplemented
 
     def __ge__(self, other):
         if isinstance(other, Opcode):
-            return int(self.__raw) >= int(other.__raw)
+            return int(self.numeric) >= other.numeric
+        elif isinstance(other, int):
+            return self.numeric >= other
+
         return NotImplemented

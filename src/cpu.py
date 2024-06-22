@@ -81,27 +81,27 @@ class CPU:
 
         match opcode.name:
             case "READ":
-                self.read(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.read(memory, io_device, int(opcode.operand))
             case "WRITE":
-                self.write(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.write(memory, io_device, int(opcode.operand))
             case "LOAD":
-                self.load(memory, int(opcode.operand))  # Cast operand to int
+                self.load(memory, int(opcode.operand))
             case "STORE":
-                self.store(memory, int(opcode.operand))  # Cast operand to int
+                self.store(memory, int(opcode.operand))
             case "ADD":
-                self.add(memory, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.add(memory, int(opcode.operand))
             case "SUBTRACT":
-                self.subtract(memory, int(opcode.operand))  # Cast operand to int
+                self.subtract(memory, int(opcode.operand))
             case "MULTIPLY":
-                self.multiply(memory, int(opcode.operand))  # Cast operand to int
+                self.multiply(memory, int(opcode.operand))
             case "DIVIDE":
-                self.divide(memory, int(opcode.operand))  # Cast operand to int
+                self.divide(memory, int(opcode.operand))
             case "BRANCH":
-                self.branch(memory, int(opcode.operand))  # Cast operand to int
+                self.branch(memory, int(opcode.operand))
             case "BRANCHNEG":
-                self.branchneg(memory, int(opcode.operand))  # Cast operand to int
+                self.branchneg(memory, int(opcode.operand))
             case "BRANCHZERO":
-                self.branchzero(memory, int(opcode.operand))  # Cast operand to int
+                self.branchzero(memory, int(opcode.operand))
             case "HALT":
                 self.halt()
             case _:
@@ -153,7 +153,7 @@ class CPU:
             address (int): The memory address where the accumulator data will be stored.
         """
         print(f"STORE {address}")
-        memory.write(address, int(str(self.acc)))  # Ensure acc is written as integer
+        memory.write(address, self.acc)
 
     def add(self, memory, address):
         """
@@ -199,7 +199,7 @@ class CPU:
         divisor = memory.read(address)
         if divisor == 0:
             raise ZeroDivisionError("Cannot divide by zero")
-        self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
+        self.acc = self.acc // divisor
 
     def branch(self, memory, address):
         """
@@ -220,7 +220,7 @@ class CPU:
             address (int): The memory address to branch to.
         """
         print(f"BRANCHNEG {address}")
-        if int(str(self.acc)) < 0:
+        if self.acc < 0:
             self.current = address
 
     def branchzero(self, memory, address):
@@ -232,7 +232,7 @@ class CPU:
             address (int): The memory address to branch to.
         """
         print(f"BRANCHZERO {address}")
-        if int(str(self.acc)) == 0:
+        if self.acc == 0:
             self.current = address
 
     def halt(self):
