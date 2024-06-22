@@ -97,7 +97,7 @@ class Window:
         self.update_main_control_frame()
 
     def tk_reader(self):
-        pass
+        return "0000"
 
     def submit_input(self):
         if self.uvsim.cpu.waiting_for_input:
@@ -167,8 +167,8 @@ class Window:
         select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.start_program)
         select_test_file_button.pack(pady=5)
 
-        memory_display_frame = tk.Frame(self.main_control_frame)
-        memory_display_frame.pack(side=tk.LEFT, padx=10)
+        self.memory_display_frame = tk.Frame(self.main_control_frame)
+        self.memory_display_frame.pack(side=tk.LEFT, padx=10)
 
         current_instruction_frame = tk.Frame(self.main_control_frame)
         current_instruction_frame.pack(pady=5)
