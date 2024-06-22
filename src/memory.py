@@ -1,37 +1,35 @@
-#!/usr/bin/env python3
+# src/memory.py
 
 class Memory:
     """
-    An abstraction representing the Memory of the UVSim virtual machine.
+    Class to represent the memory of the simulator.
     """
-
     def __init__(self):
-        """
-        Create a new memory array for a UVSim virtual machine.
-        Initializes memory with 100 words, each initialized to 0.
-        """
-        self.__mem = [0] * 100  # Assuming memory size is 100 words
-        
+        self.__mem = [0] * 100  # Initialize memory with 100 locations set to 0
+
     def __len__(self):
+        """
+        Returns the length of the memory.
+        """
         return len(self.__mem)
 
     @property
     def mem(self):
         """
-        Get the memory.
+        Returns the memory.
         """
         return self.__mem
 
     def write(self, address, value):
         """
-        Set the value (should be a signed opcode/number) at a specific index.
+        Writes a value to a specific memory address.
         
         Args:
             address (int): The memory address to write to.
-            value (int): The value to write at the specified address.
-
+            value (int): The value to write to the memory address.
+        
         Raises:
-            IndexError: If the address is out of bounds.
+            IndexError: If the address is out of range.
         """
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
@@ -39,28 +37,22 @@ class Memory:
 
     def read(self, address):
         """
-        Get the value at a specific index.
+        Reads a value from a specific memory address.
         
         Args:
             address (int): The memory address to read from.
-
-        Returns:
-            int: The value at the specified address.
-
+        
         Raises:
-            IndexError: If the address is out of bounds.
+            IndexError: If the address is out of range.
         """
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
         return self.__mem[address]
-        
+
     @property
     def __next(self):
         """
-        Return the index of the next unallocated piece of memory.
-        
-        Returns:
-            int: The index of the next available address.
+        Finds the next available memory address.
         """
         for i, value in enumerate(self.__mem):
             if value == 0:
@@ -69,13 +61,13 @@ class Memory:
 
     def writenext(self, value):
         """
-        Write the value at the next available address.
+        Writes a value to the next available memory address.
         
         Args:
-            value (int): The value to write at the next available address.
-
+            value (int): The value to write to the memory.
+        
         Raises:
-            IndexError: If there is no available memory address.
+            IndexError: If there are no available memory addresses.
         """
         next_addr = self.__next
         if next_addr >= len(self.__mem):
