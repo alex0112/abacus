@@ -66,7 +66,7 @@ class CPU:
                 self.halted = True
                 break
 
-            self.__out_line(memory.read(self.current))
+            #self.__out_line(memory.read(self.current))
 
             current_opcode = memory.read(self.current)
             self.process(current_opcode, memory, io_device)
@@ -87,27 +87,27 @@ class CPU:
         """
         match opcode.name:
             case "READ":
-                self.read(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.read(memory, io_device, int(opcode.operand))
             case "WRITE":
-                self.write(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.write(memory, io_device, int(opcode.operand))
             case "LOAD":
-                self.load(memory, int(opcode.operand))  # Cast operand to int
+                self.load(memory, int(opcode.operand))
             case "STORE":
-                self.store(memory, int(opcode.operand))  # Cast operand to int
+                self.store(memory, int(opcode.operand))
             case "ADD":
-                self.add(memory, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.add(memory, int(opcode.operand))
             case "SUBTRACT":
-                self.subtract(memory, int(opcode.operand))  # Cast operand to int
+                self.subtract(memory, int(opcode.operand))
             case "MULTIPLY":
-                self.multiply(memory, int(opcode.operand))  # Cast operand to int
+                self.multiply(memory, int(opcode.operand))
             case "DIVIDE":
-                self.divide(memory, int(opcode.operand))  # Cast operand to int
+                self.divide(memory, int(opcode.operand))
             case "BRANCH":
-                self.branch(memory, int(opcode.operand))  # Cast operand to int
+                self.branch(memory, int(opcode.operand))
             case "BRANCHNEG":
-                self.branchneg(memory, int(opcode.operand))  # Cast operand to int
+                self.branchneg(memory, int(opcode.operand))
             case "BRANCHZERO":
-                self.branchzero(memory, int(opcode.operand))  # Cast operand to int
+                self.branchzero(memory, int(opcode.operand))
             case "HALT":
                 self.halt()
             case _:
@@ -124,8 +124,10 @@ class CPU:
         """
         # self.waiting_for_input = True
         print(f"READ {address}")
+
         # while self.waiting_for_input:
         data = int(io_device.read())  # Ensure data is integer
+
         memory.write(address, data)
 
     def write(self, memory, io_device, address):
@@ -161,7 +163,7 @@ class CPU:
             address (int): The memory address where the accumulator data will be stored.
         """
         print(f"STORE {address}")
-        memory.write(address, int(str(self.acc)))  # Ensure acc is written as integer
+        memory.write(address, self.acc)
 
     def add(self, memory, address):
         """
@@ -171,8 +173,8 @@ class CPU:
             address (int): The memory address from which the data will be added to the accumulator.
         """
         print(f"ADD {address}")
-        operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) + operand:+05d}")
+        other = memory.read(address)
+        self.acc = self.acc + other
 
     def subtract(self, memory, address):
         """
@@ -193,8 +195,8 @@ class CPU:
             address (int): The memory address from which the data will be multiplied with the accumulator.
         """
         print(f"MULTIPLY {address}")
-        operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) * operand:+05d}")
+        other = memory.read(address)
+        self.acc = self.acc * other
 
     def divide(self, memory, address):
         """
@@ -204,10 +206,10 @@ class CPU:
             address (int): The memory address from which the data will be used to divide the accumulator.
         """
         print(f"DIVIDE {address}")
-        divisor = int(str(memory.read(address)))
+        divisor = memory.read(address)
         if divisor == 0:
             raise ZeroDivisionError("Cannot divide by zero")
-        self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
+        self.acc = self.acc // divisor
 
     def branch(self, memory, address):
         """
@@ -222,14 +224,13 @@ class CPU:
 
     def branchneg(self, memory, address):
         """
-        Branch to a specific location in memory if the accumulator is negative.
-        
+        Branch to a specific location in memory if the accumulator is negative.        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
         print(f"BRANCHNEG {address}")
-        if int(str(self.acc)) < 0:
+        if self.acc < 0:
             self.current = address
 
     def branchzero(self, memory, address):
@@ -241,11 +242,11 @@ class CPU:
             address (int): The memory address to branch to.
         """
         print(f"BRANCHZERO {address}")
-        if int(str(self.acc)) == 0:
+        if self.acc == 0:
             self.current = address
 
     def halt(self):
-        print(f"HALT")
+        print("HALT")
         self.halted = True
 
     def noop(self):
