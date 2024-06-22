@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from .opcodes import Opcode
+from src.opcodes import Opcode
 
 class CPU:
     """
     An abstraction representing a CPU.
     This CPU contains an accumulator register and processes opcodes to perform various operations.
     """
-    def __init__(self):
+    def __init__(self, out_line=None):
         """
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.
@@ -15,6 +15,9 @@ class CPU:
         self.__acc = Opcode("0000")
         self.__current = 0  # Where to start executing the program.
         self.__halted = False  # Whether or not the current execution should stop
+
+        self.__out_line = out_line
+        self.waiting_for_input = False
 
     @property
     def acc(self):
@@ -62,6 +65,8 @@ class CPU:
             if self.current > len(memory) - 1 or len(memory) == 0:  # If we reach the end of the program it's over
                 self.halted = True
                 break
+
+            self.__out_line(memory.read(self.current))
 
             current_opcode = memory.read(self.current)
             self.process(current_opcode, memory, io_device)
@@ -117,8 +122,10 @@ class CPU:
             io_device (IODevice): The I/O device used for reading input.
             address (int): The memory address where the input data will be stored.
         """
+        self.waiting_for_input = True
         print(f"READ {address}")
-        data = int(io_device.read())  # Ensure data is integer
+        while self.waiting_for_input:
+            data = int(io_device.read())  # Ensure data is integer
         memory.write(address, data)
 
     def write(self, memory, io_device, address):
@@ -251,6 +258,8 @@ class CPU:
         if self.current > len(memory) - 1 or len(memory) == 0:
             self.halted = True
         else:
+            self.__out_line('[ ' + str(memory.read(self.current)) + ' ]')
+
             current_opcode = memory.read(self.current)
             self.process(current_opcode, memory, io_device)
             self.current += 1
