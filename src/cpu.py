@@ -66,7 +66,7 @@ class CPU:
                 self.halted = True
                 break
 
-            self.__out_line(memory.read(self.current))
+            #self.__out_line(memory.read(self.current))
 
             current_opcode = memory.read(self.current)
             self.process(current_opcode, memory, io_device)
