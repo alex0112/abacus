@@ -35,7 +35,7 @@ class Memory:
         """
         if address < 0 or address >= len(self.__mem):
             raise IndexError("Memory address out of range")
-        self.__mem[address] = value
+        self.mem[address] = value
 
     def read(self, address):
         """

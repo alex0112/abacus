@@ -43,6 +43,11 @@ class Opcode:
         # Returns operand or final 2 digits in raw opcode
         return self.__raw[3:]
     
+
+    @property
+    def raw(self):
+        return self.__raw
+
     def __str__(self):
         return self.__raw
 
@@ -64,10 +69,12 @@ class Opcode:
         else:
             return Opcode(raw_string)
             
-    # Implementing equality and arithmetic operations
     def __eq__(self, other):
         if isinstance(other, Opcode):
-            return self.__raw == other.__raw
+            return self.raw == other.raw
+        if isinstance(other, int):
+            return self.raw == other
+
         return False
 
     def __add__(self, other):

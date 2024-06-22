@@ -117,7 +117,7 @@ class CPU:
             address (int): The memory address where the input data will be stored.
         """
         print(f"READ {address}")
-        data = int(io_device.read())  # Ensure data is integer
+        data = Opcode(io_device.read())
         memory.write(address, data)
 
     def write(self, memory, io_device, address):
@@ -163,8 +163,8 @@ class CPU:
             address (int): The memory address from which the data will be added to the accumulator.
         """
         print(f"ADD {address}")
-        operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) + operand:+05d}")
+        other = memory.read(address)
+        self.acc = self.acc + other
 
     def subtract(self, memory, address):
         """
@@ -185,8 +185,8 @@ class CPU:
             address (int): The memory address from which the data will be multiplied with the accumulator.
         """
         print(f"MULTIPLY {address}")
-        operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) * operand:+05d}")
+        other = memory.read(address)
+        self.acc = self.acc * other
 
     def divide(self, memory, address):
         """
@@ -196,7 +196,7 @@ class CPU:
             address (int): The memory address from which the data will be used to divide the accumulator.
         """
         print(f"DIVIDE {address}")
-        divisor = int(str(memory.read(address)))
+        divisor = memory.read(address)
         if divisor == 0:
             raise ZeroDivisionError("Cannot divide by zero")
         self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
@@ -214,8 +214,7 @@ class CPU:
 
     def branchneg(self, memory, address):
         """
-        Branch to a specific location in memory if the accumulator is negative.
-        
+        Branch to a specific location in memory if the accumulator is negative.        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
