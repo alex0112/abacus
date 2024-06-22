@@ -237,7 +237,7 @@ class CPU:
             self.current = address
 
     def halt(self):
-        print(f"HALT")
+        print("HALT")
         self.halted = True
 
     def noop(self):

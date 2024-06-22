@@ -125,7 +125,3 @@ class Opcode:
         if isinstance(other, Opcode):
             return int(self.__raw) >= int(other.__raw)
         return NotImplemented
-
-
-
-
