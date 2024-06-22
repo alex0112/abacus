@@ -22,10 +22,13 @@ All five members of the project contributed some code (although this is not refl
 The most basic invocation of the program is:
 
 ```bash
-python main.py <path_to_program>
+python GUI.py <path_to_program>
 ```
+It expects a text file written in BasicML as an input to execute instructions. 
+For further help on how to operate the GUI, click on HELP button on the bottom right of the window.
 
-It expects a program written in BasicML.
+
+
 
 The program works best with `Python 3.12.0`. The official release for which can be found [here](https://www.python.org/downloads/release/python-3120/)
 
