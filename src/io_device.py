@@ -12,7 +12,6 @@ class IODevice:
             self.__reader = lambda: input()  # Default to using input() if no reader is provided
         else:
             self.__reader = reader
-            self.inp = ""
         
         if writer is None:
             self.__writer = lambda x: print(x)  # Default to using print() if no writer is provided
@@ -37,9 +36,9 @@ class IODevice:
         """
         Reads input using the reader function.
         """
-        self.inp = self.__reader()
-        self.__last_read = self.inp
-        return self.inp
+        inp = self.__reader()
+        self.__last_read = inp
+        return inp
 
     def write(self, data):
         """

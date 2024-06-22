@@ -7,6 +7,7 @@ class Window:
     # Initialize the UVSim instance
     def __init__(self, root):
         self.root = root
+        self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
 
         self.title_screen_frame()
@@ -76,18 +77,18 @@ class Window:
         """
         Function to start the simulation by running the UVSim.
         """
-        # self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
-        # self.update_main_control_frame()
+        self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
+        self.update_main_control_frame()
 
-        self.simulation_running = True
-        self.run_simulation_step()
+        # self.simulation_running = True
+        # self.run_simulation_step()
         
     def run_simulation_step(self):
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
             self.execute_step()
 
             if not self.uvsim.cpu.waiting_for_input:
-                self.root.after(100, self.run_simulation_step)
+                self.run_simulation_step
 
     def execute_step(self):
         """
@@ -97,16 +98,19 @@ class Window:
         self.update_main_control_frame()
 
     def tk_reader(self):
-        return "0000"
+        self.input_var.set("")
+        self.user_input_entry.focus() 
+        self.root.wait_variable(self.input_var)
+        return self.input_var.get()
 
     def submit_input(self):
-        if self.uvsim.cpu.waiting_for_input:
+        # if self.uvsim.cpu.waiting_for_input:
             user_input = self.user_input_entry.get()
             self.user_input_entry.delete(0, tk.END)
-            self.uvsim.io_device.inp = user_input
-            self.uvsim.cpu.waiting_for_input = False
-            self.simulation_running = True
-            self.run_simulation_step()
+            self.input_var.set(user_input)
+            # self.uvsim.cpu.waiting_for_input = False
+            # self.simulation_running = True
+            # self.run_simulation_step()
 
     def tk_writer(self, text):
         self.output_label.config(text=text)

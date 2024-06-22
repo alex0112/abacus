@@ -122,10 +122,10 @@ class CPU:
             io_device (IODevice): The I/O device used for reading input.
             address (int): The memory address where the input data will be stored.
         """
-        self.waiting_for_input = True
+        # self.waiting_for_input = True
         print(f"READ {address}")
-        while self.waiting_for_input:
-            data = int(io_device.read())  # Ensure data is integer
+        # while self.waiting_for_input:
+        data = int(io_device.read())  # Ensure data is integer
         memory.write(address, data)
 
     def write(self, memory, io_device, address):
