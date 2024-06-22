@@ -18,7 +18,7 @@
 │
 ├── basm.py  ## An optional program that turns the human friendly representation of BasicML into numbers
 ├── uvsim.py ## The main abstraction which integrates the memory/cpu/io etc. into one object
-├── gui.py  ## A graphical user interface for UVSim that allows users to load, execute, and debug BasicML programs interactively
+├── gui.py   ## A graphical user interface for UVSim that allows users to load, execute, and debug BasicML programs interactively
 └── main.py  ## Bootstrap everything and get it running
 ```
 #### Files:
