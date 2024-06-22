@@ -32,7 +32,7 @@
 - **acc**: (val) Property for the accumulator, with setter and getter.
     - **val**: value to store as accumulator
     - **Post-conditions**: Returns or updates the value of the accumulator.
-- **current**: Property for the current memory address being read, with setter and getter.
+- **current**: (val) Property for the current memory address being read, with setter and getter.
     - **val**: value to be current address
     - **Pre-conditions**: `val` must be an integer between 0 and 99 inclusive.
     - **Post-conditions**: Returns or updates the current memory address.
