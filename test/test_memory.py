@@ -108,27 +108,27 @@ def test_slice():
 def test_preview_full():
     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
 
-    assert mem.preview(2, 5) == [Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")]
+    assert mem.preview(2, 5) == { 0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003"), 4: Opcode("+0004")}
 
 def test_preview_empty():
     mem = Memory()
 
-    assert mem.preview(2, 5) == [Opcode("+0000"), Opcode("+0000"), Opcode("+0000"), Opcode("+0000"), Opcode("+0000")] 
+    assert mem.preview(2, 5) == {0: Opcode("+0000"), 1: Opcode("+0000"), 2: Opcode("+0000"), 3: Opcode("+0000"), 4: Opcode("+0000")} 
 
 def test_preview_even():
     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
 
-    assert mem.preview(2, 5) == [Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")]
+    assert mem.preview(2, 4) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003")}
 
 def test_preview_begin():
     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
 
-    assert mem.preview(0, 4) == [Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003")]
+    assert mem.preview(0, 4) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003")}
 
 def test_preview_near_begin():
     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
 
-    assert mem.preview(1, 2) == [Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003")]
+    assert mem.preview(1, 2) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003")}
 
 def test_preview_end():
     mem = Memory()
@@ -139,7 +139,7 @@ def test_preview_end():
     mem.write(98, Opcode("+0098"))
     mem.write(99, Opcode("+0099"))
 
-    assert mem.preview(97, 5) == [Opcode("+0095"), Opcode("+0096"), Opcode("+0097"), Opcode("+0098"), Opcode("+0099")]
+    assert mem.preview(97, 5) == {95: Opcode("+0095"), 96: Opcode("+0096"), 97: Opcode("+0097"), 98: Opcode("+0098"), 99: Opcode("+0099")}
 
 def test_preview_near_end():
     mem = Memory()
@@ -150,4 +150,4 @@ def test_preview_near_end():
     mem.write(98, Opcode("+0098"))
     mem.write(99, Opcode("+0099"))
 
-    assert mem.preview(98, 5) == [Opcode("+0095"), Opcode("+0096"), Opcode("+0097"), Opcode("+0098"), Opcode("+0099")]
+    assert mem.preview(98, 5) == {95: Opcode("+0095"), 96: Opcode("+0096"), 97: Opcode("+0097"), 98: Opcode("+0098"), 99: Opcode("+0099")}
