@@ -98,5 +98,3 @@ class Memory:
     def preview(self, center, size=3):
         top    = (center - size) % 99
         bottom = (center - size)
-
-        

@@ -81,11 +81,25 @@ def test_writenext():
 ########################
 
 def test_index():
-    pass
-    memory = Memory()
+    mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002")])
 
-    
+    assert mem[0] == Opcode("+0000")
+    assert mem[1] == Opcode("+0001")
+    assert mem[2] == Opcode("+0002")
+            
 
+## TODO: This might not actually be desirable behavior so we should make a design decision here
+# def test_negative_index():
+#     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002")])
+
+#     assert mem[-1] == Opcode("+0002")
+#     assert mem[-2] == Opcode("+0001")
+#     assert mem[-3] == Opcode("+0000")
+
+def test_slice():
+    mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
+
+    assert mem[1:3] == [Opcode("+0001"), Opcode("+0002")]
 
 ###########
 # Preview #
