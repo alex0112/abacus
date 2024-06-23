@@ -4,6 +4,8 @@ class Memory:
     """
     Class to represent the memory of the simulator.
     """
+    ADDRESSABLE_SPACE = range(0, 100)
+    
     def __init__(self, arr=[]):
         if len(arr) == 0:
             self.__mem = dict()
@@ -41,7 +43,7 @@ class Memory:
         """
         assert isinstance(address, int)
 
-        if address < 0 or address > 100:
+        if address not in Memory.ADDRESSABLE_SPACE:
             raise IndexError("Memory address out of range")
         self.mem[address] = value
 
@@ -55,7 +57,7 @@ class Memory:
         Raises:
             IndexError: If the address is out of range.
         """
-        if address < 0 or address > 99:
+        if address not in Memory.ADDRESSABLE_SPACE:
             raise IndexError("Memory address out of range")
 
         return self.__mem.get(address, Opcode("+0000"))
@@ -69,6 +71,7 @@ class Memory:
         #  sort them
         #  get the last key
         #  __next value should be that value plus one
+        # TODO: Optimize by caching this?
         return sorted(self.__mem.keys())[-1] + 1
 
     def writenext(self, value):
@@ -82,7 +85,7 @@ class Memory:
             IndexError: If there are no available memory addresses.
         """
         next_addr = self.__next
-        if next_addr > 99:
+        if next_addr not in Memory.ADDRESSABLE_SPACE:
             raise IndexError("No available memory address")
         self.write(next_addr, value)
 
