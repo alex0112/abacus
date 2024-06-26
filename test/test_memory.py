@@ -125,15 +125,15 @@ def test_preview_near_begin_odd():
 
     assert mem.preview(1, 5) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003"), 4: Opcode("+0004")}
 
-# def test_preview_begin_even():
-#     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
+def test_preview_begin_even():
+    mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
 
-#     assert mem.preview(0, 4) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003"), 4: Opcode("+0004")}
+    assert mem.preview(0, 4) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003"), 4: Opcode("+0004")}
 
-# def test_preview_near_begin_even():
-#     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
+def test_preview_near_begin_even():
+    mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
 
-#     assert mem.preview(1, 4) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003")}
+    assert mem.preview(1, 4) == {0: Opcode("+0000"), 1: Opcode("+0001"), 2: Opcode("+0002"), 3: Opcode("+0003"), 4: Opcode("+0004")}
 
 # def test_preview_end():
 #     mem = Memory()
