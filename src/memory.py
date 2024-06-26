@@ -95,6 +95,52 @@ class Memory:
         if isinstance(key, slice):
             return [self.read(i) for i in range(key.start, key.stop)]
 
+    @staticmethod
+    def __preview_lower_bound(center, size):
+        lower = center - (size // 2)
+
+        if lower not in Memory.ADDRESSABLE_SPACE:
+            return Memory.ADDRESSABLE_SPACE.start
+        else:
+            return lower
+
+    @staticmethod
+    def __preview_upper_bound(center, size):
+        ## The upper bound should be 
+
+        upper = center + (size // 2) + 1
+
+        if upper not in Memory.ADDRESSABLE_SPACE:
+            return Memory.ADDRESSABLE_SPACE.stop
+        else:
+            return upper
+
+    @staticmethod
+    def __preview_range(center, size):
+        lower = Memory.__preview_lower_bound(center, size)
+        upper = Memory.__preview_upper_bound(center, size)
+        offset = size // 2
+
+
+        if (center - offset) != (center - lower):
+            print(f"Upper: {upper} Lower: {lower}")
+            print(f"Upper bound adjusted from {upper} to ", end='')
+            upper += abs(center - offset)
+            print(f"{upper}")
+
+        # if center - (size //2) != (upper - center):
+        #     print(f"Lower bound adjusted from {lower} to ", end='')
+        #     lower -= (upper - center)
+        #     print(f"{lower}")
+
+        return range(lower, upper)
+
     def preview(self, center, size=3):
-        top    = (center - size) % 99
-        bottom = (center - size)
+        preview_range = Memory.__preview_range(center, size)
+
+        preview = {}
+
+        for address in preview_range:
+            preview[address] = self[address]
+
+        return preview
