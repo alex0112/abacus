@@ -237,3 +237,21 @@ def test_underflow_product():
     print(f"{op1} * {op2} == {result.numeric}")
 
     assert result == Opcode("-9998")
+
+##################
+# Human Readable #
+##################
+
+def test_named_opcode():
+    write_op = Opcode("+1101")
+    read_op = Opcode("+1002")
+
+    assert write_op.human_friendly == "WRITE 01"
+    assert read_op.human_friendly == "READ 02"
+
+def test_unamed_opcode():
+    op1 = Opcode("-0001")
+    op2 = Opcode("+7700")
+
+    assert op1.human_friendly == "NOOP"
+    assert op2.human_friendly == "NOOP"

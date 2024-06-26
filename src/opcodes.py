@@ -68,6 +68,15 @@ class Opcode:
     def numeric(self):
         return self.__numeric
 
+    
+    @property
+    def human_friendly(self):
+        if self.name == "NOOP":
+            return self.name
+        else:
+            return f"{self.name} {self.operand}"
+
+
     def __str__(self):
         """
         Returns the string representation of the opcode.
@@ -240,3 +249,4 @@ class Opcode:
             return self.numeric >= other
 
         return NotImplemented
+    
