@@ -119,19 +119,18 @@ class Memory:
     def __preview_range(center, size):
         lower = Memory.__preview_lower_bound(center, size)
         upper = Memory.__preview_upper_bound(center, size)
-        offset = size // 2
+        offset = size // 2 ## The offset is how far away from the center the bounds move
 
-
-        if (center - offset) != (center - lower):
-            print(f"Upper: {upper} Lower: {lower}")
-            print(f"Upper bound adjusted from {upper} to ", end='')
+        if (center - offset) not in Memory.ADDRESSABLE_SPACE:
+            ## i.e. if the offset produces a value below zero
+            #  add the remainder of the offset to the upper bound
             upper += abs(center - offset)
-            print(f"{upper}")
 
-        # if center - (size //2) != (upper - center):
-        #     print(f"Lower bound adjusted from {lower} to ", end='')
-        #     lower -= (upper - center)
-        #     print(f"{lower}")
+        if (center + offset) not in Memory.ADDRESSABLE_SPACE:
+            ## i.e. if we the offset would overflow out of
+            #  the addressable space, move the lower bound
+            #  down so that it preserves the window size
+            lower -= (center + offset) - Memory.ADDRESSABLE_SPACE.stop + 1
 
         return range(lower, upper)
 
@@ -139,7 +138,6 @@ class Memory:
         preview_range = Memory.__preview_range(center, size)
 
         preview = {}
-
         for address in preview_range:
             preview[address] = self[address]
 
