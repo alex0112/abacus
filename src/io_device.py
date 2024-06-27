@@ -3,10 +3,18 @@
 class IODevice:
     """
     Class to represent an input/output device for the simulator.
+
+    Three components:
+    - Reader
+    - Writer
+    - Error
+
+    
     """
-    def __init__(self, reader=None, writer=None):
+    def __init__(self, reader=None, writer=None, err=None):
         self.__last_write = ""
         self.__last_read = ""
+        self.__last_err = ""
 
         if reader is None:
             self.__reader = lambda: input()  # Default to using input() if no reader is provided
@@ -17,6 +25,11 @@ class IODevice:
             self.__writer = lambda x: print(x)  # Default to using print() if no writer is provided
         else:
             self.__writer = writer
+
+        if err is None:
+            self.__err = lambda x: print(x)
+        else:
+            self.__err = err
 
     @property
     def last_read(self):
@@ -32,11 +45,19 @@ class IODevice:
         """
         return self.__last_write
 
+    @property
+    def last_err(self):
+        """
+        Returns the last err output.
+        """
+        return self.__last_err
+
     def read(self):
         """
         Reads input using the reader function.
         """
         inp = self.__reader()
+        print(f"got {inp} as input")
         self.__last_read = inp
         return inp
 
@@ -45,4 +66,11 @@ class IODevice:
         Writes output using the writer function.
         """
         self.__last_write = data
+        self.__writer(data)
+
+    def err(self, data):
+        """
+        Writes output using the err function.
+        """
+        self.__last_err = data
         self.__writer(data)
