@@ -5,18 +5,19 @@ class Memory:
     Class to represent the memory of the simulator.
     """
     ADDRESSABLE_SPACE = range(0, 100)
-    
+    LAST_ADDRESS      = ADDRESSABLE_SPACE.stop - 1
+
     def __init__(self, arr=[]):
         if len(arr) == 0:
             self.__mem = dict()
+        elif len(arr) not in Memory.ADDRESSABLE_SPACE:
+            raise IndexError(f"Attempted to create a Memory object out of an array of length {len(arr)}. Cannot create object with an array whose length exceeds {Memory.ADDRESSABLE_SPACE.stop}")
         else:
             mem = dict()
             for i in range(len(arr)):
                 mem[i] = arr[i]
             self.__mem = mem
         
-        #self.__mem = [0] * 100  # Initialize memory with 100 locations set to 0
-
     def __len__(self):
         """
         Returns the current number of memory locations that have been written to
@@ -72,7 +73,7 @@ class Memory:
         #  get the last key
         #  __next value should be that value plus one
         # TODO: Optimize by caching this?
-        if len(self.__mem) == 0: 
+        if len(self.__mem) == 0:
             return 0 ## i.e. if nothing has yet to be written return the start
         else:
             return sorted(self.__mem.keys())[-1] + 1

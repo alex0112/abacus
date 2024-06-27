@@ -35,10 +35,23 @@ def test_init_from_list():
     assert mem.mem[1] == Opcode("+0001")
     assert mem.mem[2] == Opcode("+0002")
 
+def test_init_from_exact_list():
+    size = Memory.LAST_ADDRESS
+    arr  = [Opcode("+0000")] * size
+
+    memory = Memory(arr)
+    assert isinstance(memory, Memory)
+
 def test_bad_init_from_list():
     mem = Memory()
     with pytest.raises(IndexError):
         mem.write(1000000000000, 0)
+
+def test_bad_init_from_large_list():
+    with pytest.raises(IndexError):
+        too_big = [Opcode("+0000")] * (Memory.LAST_ADDRESS + 1)
+
+        Memory(too_big)
 
 ########
 # Read #
@@ -98,9 +111,7 @@ def test_index():
 # def test_negative_index():
 #     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002")])
 
-#     assert mem[-1] == Opcode("+0002")
-#     assert mem[-2] == Opcode("+0001")
-#     assert mem[-3] == Opcode("+0000")
+#     assert mem[-1] == ?
 
 def test_slice():
     mem = Memory([Opcode("+0000"), Opcode("+0001"), Opcode("+0002"), Opcode("+0003"), Opcode("+0004")])
