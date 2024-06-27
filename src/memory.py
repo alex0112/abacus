@@ -19,7 +19,7 @@ class Memory:
 
     def __len__(self):
         """
-        Returns the length of the memory.
+        Returns the current number of memory locations that have been written to
         """
         return len(self.__mem.keys())
 
@@ -60,7 +60,7 @@ class Memory:
         if address not in Memory.ADDRESSABLE_SPACE:
             raise IndexError("Memory address out of range")
 
-        return self.__mem.get(address, Opcode("+0000"))
+        return self.__mem.get(address, Opcode("+0000")) ## Default to +0000 for unwritten memory
 
     @property
     def __next(self):
@@ -72,7 +72,10 @@ class Memory:
         #  get the last key
         #  __next value should be that value plus one
         # TODO: Optimize by caching this?
-        return sorted(self.__mem.keys())[-1] + 1
+        if len(self.__mem) == 0: 
+            return 0 ## i.e. if nothing has yet to be written return the start
+        else:
+            return sorted(self.__mem.keys())[-1] + 1
 
     def writenext(self, value):
         """
@@ -106,8 +109,6 @@ class Memory:
 
     @staticmethod
     def __preview_upper_bound(center, size):
-        ## The upper bound should be 
-
         upper = center + (size // 2) + 1
 
         if upper not in Memory.ADDRESSABLE_SPACE:
@@ -134,7 +135,7 @@ class Memory:
 
         return range(lower, upper)
 
-    def preview(self, center, size=3):
+    def preview(self, center, size=7):
         preview_range = Memory.__preview_range(center, size)
 
         preview = {}

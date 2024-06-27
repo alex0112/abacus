@@ -67,7 +67,6 @@ class Opcode:
     @property
     def numeric(self):
         return self.__numeric
-
     
     @property
     def human_friendly(self):
@@ -75,7 +74,6 @@ class Opcode:
             return self.name
         else:
             return f"{self.name} {self.operand}"
-
 
     def __str__(self):
         """

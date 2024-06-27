@@ -67,6 +67,12 @@ def test_write(memory):
 ########################
 # Write Next Available #
 ########################
+def test_writenext_empty():
+    memory = Memory()
+    memory.writenext(1042)
+
+    assert memory[0] == Opcode("+1042")
+
 def test_writenext():
     memory = Memory()
     memory.write(0, 1234)
@@ -178,7 +184,3 @@ def test_preview_end_even():
     mem.write(99, Opcode("+0099"))
 
     assert mem.preview(99, 4) == {95: Opcode("+0095"), 96: Opcode("+0096"), 97: Opcode("+0097"), 98: Opcode("+0098"), 99: Opcode("+0099")}
-
-
-
-
