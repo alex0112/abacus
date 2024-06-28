@@ -48,4 +48,8 @@ class UVSim:
         #if len(self.mem) == 0:
         #pass ## TODO: define this behavior
         #else:
-        self.cpu.run(self.mem, self.io_device)
+        try:
+            self.cpu.run(self.mem, self.io_device, preview=True)
+        except KeyboardInterrupt:
+            print("\nAborting...")
+            exit(0)

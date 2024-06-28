@@ -42,7 +42,6 @@ def assemble(program, filename):
             counter += 1
 
     print(f"Wrote disassembled program to {filename}")
-            
 
 if __name__ == '__main__':
     main()

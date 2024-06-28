@@ -12,7 +12,11 @@ class Opcode:
         Raises:
             ValueError: If the raw value is invalid.
         """
+        if isinstance(raw, int):
+            raw = f"{raw:+05d}"
+
         raw = raw.strip()
+
         if not raw:
             raise ValueError("Opcode cannot be empty")
         if raw[0] not in ['-', '+']:
@@ -67,6 +71,13 @@ class Opcode:
     @property
     def numeric(self):
         return self.__numeric
+    
+    @property
+    def human_friendly(self):
+        if self.name == "NOOP":
+            return self.name
+        else:
+            return f"{self.name} {self.operand}"
 
     def __str__(self):
         """
@@ -85,10 +96,13 @@ class Opcode:
         raw_string = f"{int(raw_integer):+05d}"
 
         if raw_integer > 9999 or raw_integer < -9999:
-            truncated = raw_string[:-4] ## Grab the last four digits
-            sign      = raw_string[0]
+            truncated  = raw_string[-4:] ## Grab the last four digits
+            sign       = raw_string[0]
+            overflowed = int(f"{sign}{truncated}")
 
-            return Opcode(f"{int(truncated):+05d}")
+            print(f"warning: overflowing {raw_string} to {overflowed:+05d}")
+            
+            return Opcode(f"{overflowed:+05d}")
         else:
             return Opcode(raw_string)
             
@@ -237,3 +251,4 @@ class Opcode:
             return self.numeric >= other
 
         return NotImplemented
+    
