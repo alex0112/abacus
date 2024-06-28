@@ -12,7 +12,11 @@ class Opcode:
         Raises:
             ValueError: If the raw value is invalid.
         """
+        if isinstance(raw, int):
+            raw = f"{raw:+05d}"
+
         raw = raw.strip()
+
         if not raw:
             raise ValueError("Opcode cannot be empty")
         if raw[0] not in ['-', '+']:

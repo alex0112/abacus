@@ -46,6 +46,10 @@ class Memory:
 
         if address not in Memory.ADDRESSABLE_SPACE:
             raise IndexError("Memory address out of range")
+
+        if isinstance(value, int):
+            value = Opcode(value)
+        
         self.mem[address] = value
 
     def read(self, address):

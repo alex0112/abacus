@@ -17,7 +17,7 @@ class IODevice:
         self.__last_err = ""
 
         if reader is None:
-            self.__reader = lambda: input()  # Default to using input() if no reader is provided
+            self.__reader = lambda: input(">>> ")  # Default to using input() if no reader is provided
         else:
             self.__reader = reader
         
@@ -38,12 +38,21 @@ class IODevice:
         """
         return self.__last_read
 
+
+    @last_read.setter
+    def last_read(self, val):
+        self.__last_read = val
+
     @property
     def last_write(self):
         """
         Returns the last written output.
         """
         return self.__last_write
+
+    @last_write.setter
+    def last_write(self, val):
+        self.__last_write = val
 
     @property
     def last_err(self):
@@ -52,25 +61,29 @@ class IODevice:
         """
         return self.__last_err
 
+    @last_err.setter
+    def last_err(self, val):
+        self.__last_err = val
+
     def read(self):
         """
         Reads input using the reader function.
         """
         inp = self.__reader()
         print(f"got {inp} as input")
-        self.__last_read = inp
+        self.last_read = inp
         return inp
 
     def write(self, data):
         """
         Writes output using the writer function.
         """
-        self.__last_write = data
+        self.last_write = data
         self.__writer(data)
 
     def err(self, data):
         """
         Writes output using the err function.
         """
-        self.__last_err = data
+        self.last_err = data
         self.__writer(data)
