@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import tkinter as tk
 from tkinter import filedialog
 from uvsim import UVSim
@@ -68,7 +70,8 @@ class Window:
         """
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
-        memory_contents = "\n".join([f"{i:02}: {self.uvsim.mem.read(i):+05d}" for i in range(100)])
+
+        memory_contents = self.uvsim.io_device.last_err
         memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10))
         memory_label.pack()
         self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
