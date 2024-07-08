@@ -82,8 +82,6 @@ class Window:
         """
         Function to start the simulation by running the UVSim.
         """
-        # self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
-        # self.update_main_control_frame()
 
         self.simulation_running = True
         self.run_simulation_step()
@@ -109,13 +107,9 @@ class Window:
         return self.input_var.get()
 
     def submit_input(self, event=None):
-        # if self.uvsim.cpu.waiting_for_input:
-            user_input = self.user_input_entry.get()
-            self.user_input_entry.delete(0, tk.END)
-            self.input_var.set(user_input)
-            # self.uvsim.cpu.waiting_for_input = False
-            # self.simulation_running = True
-            # self.run_simulation_step()
+        user_input = self.user_input_entry.get()
+        self.user_input_entry.delete(0, tk.END)
+        self.input_var.set(user_input)
 
     def tk_writer(self, text):
         self.output_label.config(text=text)
