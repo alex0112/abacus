@@ -11,6 +11,7 @@ class Window:
         self.root = root
         self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
+        self.simulation_running = False
 
         self.title_screen_frame()
         self.select_screen_frame()
@@ -81,18 +82,16 @@ class Window:
         """
         Function to start the simulation by running the UVSim.
         """
-        self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
-        self.update_main_control_frame()
+        # self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
+        # self.update_main_control_frame()
 
-        # self.simulation_running = True
-        # self.run_simulation_step()
+        self.simulation_running = True
+        self.run_simulation_step()
         
     def run_simulation_step(self):
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
             self.execute_step()
-
-            if not self.uvsim.cpu.waiting_for_input:
-                self.run_simulation_step
+            self.root.after(200, self.run_simulation_step)
 
     def execute_step(self):
         """
@@ -102,12 +101,14 @@ class Window:
         self.update_main_control_frame()
 
     def tk_reader(self):
+        self.prompt_label.config(text="Please input a four digit command or a four digit value.")
         self.input_var.set("")
         self.user_input_entry.focus() 
         self.root.wait_variable(self.input_var)
+        self.prompt_label.config(text="")
         return self.input_var.get()
 
-    def submit_input(self):
+    def submit_input(self, event=None):
         # if self.uvsim.cpu.waiting_for_input:
             user_input = self.user_input_entry.get()
             self.user_input_entry.delete(0, tk.END)
@@ -121,6 +122,11 @@ class Window:
 
     def tk_out_line(self, text):
         self.current_instruction_label.config(text=text)
+
+    def halt(self):
+        self.simulation_running = False
+        self.uvsim.cpu.current = 0
+        self.update_main_control_frame()
 
 
         # Title Screen Frame
@@ -166,7 +172,7 @@ class Window:
         step_execution_button = tk.Button(program_control_panel, text="Step Execution", command=self.execute_step)
         step_execution_button.pack(pady=5)
 
-        halt_button = tk.Button(program_control_panel, text="Halt", command=lambda: print("Halt"))
+        halt_button = tk.Button(program_control_panel, text="Halt", command=self.halt)
         halt_button.pack(pady=5)
 
         help_button_main = tk.Button(program_control_panel, text="Help", command=self.show_help)
@@ -202,6 +208,12 @@ class Window:
 
         input_button = tk.Button(user_input_panel, text="Input", command=self.submit_input)
         input_button.pack(pady=5)
+
+        prompt_panel = tk.Frame(self.main_control_frame)
+        prompt_panel.pack(pady=5)
+
+        self.prompt_label = tk.Label(prompt_panel, text="", font=("Courier", 12))
+        self.prompt_label.pack()
 
 
 root = tk.Tk()
