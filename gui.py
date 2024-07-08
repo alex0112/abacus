@@ -1,8 +1,7 @@
 import json
 import tkinter as tk
-from tkinter import filedialog, colorchooser
+from tkinter import filedialog, colorchooser, messagebox
 from uvsim import UVSim
-
 
 class Window:
     def __init__(self, root):
@@ -17,10 +16,9 @@ class Window:
         
         self.title_screen_frame()
         self.select_screen_frame()
+        self.main_screen_frame()
 
         self.uvsim = UVSim(reader=self.tk_reader, writer=self.tk_writer, out_line=self.tk_out_line)
-
-        self.main_screen_frame()
 
     def load_config(self):
         try:
@@ -91,7 +89,8 @@ class Window:
 
     def start_program(self):
         self.title_frame.pack_forget()
-        self.file_selection_frame.pack()
+        self.file_selection_frame.pack(padx=20, pady=20)
+        self.root.update_idletasks()  # Force the window to update its size
 
     def browse_files(self):
         file_path = filedialog.askopenfilename(initialdir="./bml_examples", title="Select a File",
@@ -104,8 +103,9 @@ class Window:
         if file_path:
             self.uvsim.load(file_path)
             self.file_selection_frame.pack_forget()
-            self.main_control_frame.pack()
+            self.main_control_frame.pack(padx=20, pady=20)
             self.update_main_control_frame()
+            self.root.update_idletasks()  # Force the window to update its size
 
     def update_main_control_frame(self):
         for widget in self.memory_display_frame.winfo_children():
@@ -114,12 +114,18 @@ class Window:
         memory_contents = self.uvsim.cpu.preview_state(self.uvsim.mem)
         memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10),
                                 bg=self.primary_color, fg=self.off_color)
-        memory_label.pack()
+        memory_label.pack(padx=10, pady=(10, 0))
+
         self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
 
     def start_simulation(self):
         self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
         self.update_main_control_frame()
+
+    def halt_simulation(self):
+        self.uvsim.cpu.halted = True
+        self.update_main_control_frame()
+        messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 
     def execute_step(self):
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
@@ -191,8 +197,20 @@ class Window:
     def main_screen_frame(self):
         self.main_control_frame = tk.Frame(self.root, bg=self.primary_color)
 
-        program_control_panel = tk.Frame(self.main_control_frame, bg=self.primary_color)
-        program_control_panel.pack(side=tk.LEFT, padx=10)
+        # Add the header here
+        title_label = tk.Label(self.main_control_frame, text="UVSim - Control Panel", font=("Helvetica", 24),
+                               bg=self.primary_color, fg=self.off_color)
+        title_label.pack(pady=10)
+
+        top_frame = tk.Frame(self.main_control_frame, bg=self.primary_color)
+        top_frame.pack(side=tk.TOP, fill=tk.X)
+
+        bottom_frame = tk.Frame(self.main_control_frame, bg=self.primary_color)
+        bottom_frame.pack(side=tk.TOP, fill=tk.X)
+
+        # Top row of panels
+        program_control_panel = tk.LabelFrame(top_frame, text="Program Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), padx=10, labelanchor='n')
+        program_control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
         start_simulation_button = tk.Button(program_control_panel, text="Start Simulation", command=self.start_simulation,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
@@ -204,7 +222,7 @@ class Window:
                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         step_execution_button.pack(pady=5)
 
-        halt_button = tk.Button(program_control_panel, text="Halt", command=lambda: print("Halt"),
+        halt_button = tk.Button(program_control_panel, text="Halt", command=self.halt_simulation,
                                 bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                 highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         halt_button.pack(pady=5)
@@ -219,38 +237,46 @@ class Window:
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         select_test_file_button.pack(pady=5)
 
-        self.memory_display_frame = tk.Frame(self.main_control_frame, bg=self.primary_color)
-        self.memory_display_frame.pack(side=tk.LEFT, padx=10)
+        self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        current_instruction_frame = tk.Frame(self.main_control_frame, bg=self.primary_color)
-        current_instruction_frame.pack(pady=5)
+        control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        self.current_instruction_label = tk.Label(current_instruction_frame, text="[ +0000 ]", font=("Courier", 14),
+        self.current_instruction_label = tk.Label(control_panel, text="[ +0000 ]", font=("Courier", 14),
                                                   bg=self.primary_color, fg=self.off_color)
-        self.current_instruction_label.pack()
+        self.current_instruction_label.pack(padx=10, pady=(10, 0))
 
-        output_panel = tk.Frame(self.main_control_frame, bg=self.primary_color)
-        output_panel.pack(pady=5)
+        # Bottom row of panels
+        current_instruction_panel = tk.LabelFrame(bottom_frame, text="Current Instruction", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        current_instruction_panel.pack(fill=tk.BOTH, padx=10, pady=10)
+
+        self.current_instruction_display = tk.Label(current_instruction_panel, text="[ 0000 ]", font=("Courier", 12),
+                                                    bg=self.primary_color, fg=self.off_color)
+        self.current_instruction_display.pack(padx=10, pady=(10, 0))
+
+        output_panel = tk.LabelFrame(bottom_frame, text="Output Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        output_panel.pack(fill=tk.BOTH, padx=10, pady=10)
 
         self.output_label = tk.Label(output_panel, text="N/A", font=("Courier", 12),
                                      bg=self.primary_color, fg=self.off_color)
-        self.output_label.pack()
+        self.output_label.pack(padx=10, pady=(10, 0))
 
-        user_input_panel = tk.Frame(self.main_control_frame, bg=self.primary_color)
-        user_input_panel.pack(pady=5)
+        user_input_panel = tk.LabelFrame(bottom_frame, text="User Input Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        user_input_panel.pack(fill=tk.BOTH, padx=10, pady=10)
 
         user_input_label = tk.Label(user_input_panel, text="Input: ", font=("Courier", 12),
                                     bg=self.primary_color, fg=self.off_color)
-        user_input_label.pack(side=tk.LEFT)
+        user_input_label.pack(side=tk.LEFT, padx=10, pady=(10, 0))
 
         self.user_input_entry = tk.Entry(user_input_panel)
-        self.user_input_entry.pack(side=tk.LEFT)
+        self.user_input_entry.pack(side=tk.LEFT, padx=10, pady=(10, 0))
         self.user_input_entry.bind("<Return>", self.submit_input)
 
         input_button = tk.Button(user_input_panel, text="Input", command=self.submit_input,
                                  bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                  highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        input_button.pack(pady=5)
+        input_button.pack(padx=10, pady=(10, 0))
 
     def change_colors(self):
         primary_color = colorchooser.askcolor(title="Choose Primary Color")[1]
@@ -271,7 +297,6 @@ class Window:
         self.update_colors()
         self.root.destroy()
         self.__init__(tk.Tk())
-
 
 root = tk.Tk()
 window = Window(root)
