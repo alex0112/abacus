@@ -217,6 +217,9 @@
 - **load_file**: Function to load the selected file into the UVSim and transition to the main control screen.
     - **Pre-conditions**: A valid file path must be provided.
     - **Post-conditions**: The selected file is loaded into the UVSim, and the main control screen is displayed.
+- **store_file**: Function to save the current state of the UVSim memory to a file using the file dialog.
+    - **Pre-conditions**: A file must be loaded to the UVsim program.
+    - **Post-conditions**: The memory contents are saved to the specified file.
 - **update_main_control_frame**: Function to update the memory display and current instruction display in the main control frame.
     - **Post-conditions**: The memory display and current instruction display are updated with the latest information from the UVSim.
 - **start_simulation**: Function to start the simulation by running the UVSim.
