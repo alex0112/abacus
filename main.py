@@ -13,6 +13,7 @@
 
 from sys import argv
 from uvsim import UVSim
+from src.io_device import IODevice
 
 def main():
     """
@@ -24,13 +25,11 @@ def main():
         print("Please specify a program to execute")
         exit(1)
 
-    
     program = argv[-1]
-    uvsim = UVSim()
+    uvsim   = UVSim()
 
     uvsim.load(program)
     uvsim.execute()
-    
 
 def banner():
     """

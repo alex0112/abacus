@@ -31,7 +31,16 @@ def test_init():
 def test_read(io_device):
     io_device.read = lambda: "1234"
     assert io_device.read() == "1234"
+    #assert io_device.last_read == "1234"
 
 def test_write(io_device):
     io_device.write = lambda x: x
     assert io_device.write("1234") == "1234"
+    #assert io_device.last_write == "1234"
+
+def test_err(io_device):
+    io_device.err = lambda x: x
+    assert io_device.err("1234") == "1234"
+    #assert io_device.last_err == "1234"
+    
+    

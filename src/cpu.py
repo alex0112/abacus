@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 
-from .opcodes import Opcode
+from src.opcodes import Opcode
+from src.memory import Memory
 
 class CPU:
     """
     An abstraction representing a CPU.
     This CPU contains an accumulator register and processes opcodes to perform various operations.
     """
-    def __init__(self):
+    def __init__(self, out_line=None):
         """
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.
         """
-
         self.__acc = Opcode("0000")
         self.__current = 0  # Where to start executing the program.
         self.__halted = False  # Whether or not the current execution should stop
+        self.waiting_for_input = False
 
     @property
     def acc(self):
@@ -38,7 +39,7 @@ class CPU:
 
     @current.setter
     def current(self, val):
-        if val > 99 or val < 0:
+        if val not in Memory.ADDRESSABLE_SPACE:
             raise IndexError(f"Attempted to set current address to {val}. Cannot set to a value that is not between 0-99 inclusive.")
         elif val == 99:
             self.halted = True
@@ -53,17 +54,37 @@ class CPU:
     def halted(self, val):
         self.__halted = val
 
-    def run(self, memory, io_device, address=0):
+    def preview_state(self, mem, size=9):
+        """
+        Create a multi-line string preview of the current execution location
+        with context around the memory contents and an indication of the current instruction
+        """
+        window = mem.preview(self.current, size)
+        lines = []
+
+        for address, opcode in window.items():
+            if address == self.current:
+                lines.append(f"==> {address:02d}   {opcode}   {opcode.human_friendly}")
+            else:
+                lines.append(f"    {address:02d}   {opcode}   {opcode.human_friendly}")
+
+        return "\n\n" + "\n".join(lines)
+
+    def run(self, memory, io_device, address=0, preview=False):
+        """
+        Run the simulation starting from the given address.
+        """
         self.current = address
 
         while not self.halted:
-            if self.current > len(memory) - 1 or len(memory) == 0:  # If we reach the end of the program it's over
+            if preview:
+                io_device.err(self.preview_state(memory))
+
+            if self.current not in Memory.ADDRESSABLE_SPACE: # If we reach the end of the program it's over
                 self.halted = True
                 break
 
-            current_opcode = memory.read(self.current)
-            self.process(current_opcode, memory, io_device)
-            self.current += 1  # Move on to the next address
+            self.step(memory, io_device)
 
     def process(self, opcode, memory, io_device):
         """
@@ -75,33 +96,31 @@ class CPU:
             io_device (IODevice): The I/O device involved in the operation.
         
         Raises:
-            ValueError: If an unknown opcode is encountered.
             IndexError: If the address is out of bounds.
         """
-
         match opcode.name:
             case "READ":
-                self.read(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.read(memory, io_device, int(opcode.operand))
             case "WRITE":
-                self.write(memory, io_device, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.write(memory, io_device, int(opcode.operand))
             case "LOAD":
-                self.load(memory, int(opcode.operand))  # Cast operand to int
+                self.load(memory, int(opcode.operand))
             case "STORE":
-                self.store(memory, int(opcode.operand))  # Cast operand to int
+                self.store(memory, int(opcode.operand))
             case "ADD":
-                self.add(memory, int(opcode.operand))  # Fixed typo and cast operand to int
+                self.add(memory, int(opcode.operand))
             case "SUBTRACT":
-                self.subtract(memory, int(opcode.operand))  # Cast operand to int
+                self.subtract(memory, int(opcode.operand))
             case "MULTIPLY":
-                self.multiply(memory, int(opcode.operand))  # Cast operand to int
+                self.multiply(memory, int(opcode.operand))
             case "DIVIDE":
-                self.divide(memory, int(opcode.operand))  # Cast operand to int
+                self.divide(memory, int(opcode.operand))
             case "BRANCH":
-                self.branch(memory, int(opcode.operand))  # Cast operand to int
+                self.branch(memory, int(opcode.operand))
             case "BRANCHNEG":
-                self.branchneg(memory, int(opcode.operand))  # Cast operand to int
+                self.branchneg(memory, int(opcode.operand))
             case "BRANCHZERO":
-                self.branchzero(memory, int(opcode.operand))  # Cast operand to int
+                self.branchzero(memory, int(opcode.operand))
             case "HALT":
                 self.halt()
             case _:
@@ -116,8 +135,15 @@ class CPU:
             io_device (IODevice): The I/O device used for reading input.
             address (int): The memory address where the input data will be stored.
         """
-        print(f"READ {address}")
-        data = int(io_device.read())  # Ensure data is integer
+
+        data = None
+        while data is None:
+            try:
+               data = Opcode(io_device.read())
+            except ValueError:
+                io_device.err(f"ERROR: Unable to parse {io_device.last_read}. Please enter a signed integer in the format +1042.")
+                data = None
+
         memory.write(address, data)
 
     def write(self, memory, io_device, address):
@@ -129,7 +155,6 @@ class CPU:
             io_device (IODevice): The I/O device used for writing output.
             address (int): The memory address from which the data will be read.
         """
-        print(f"WRITE {address}")
         data = memory.read(address)
         io_device.write(data)
 
@@ -141,7 +166,6 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be loaded into the accumulator.
         """
-        print(f"LOAD {address}")
         self.acc = memory.read(address)
 
     def store(self, memory, address):
@@ -152,8 +176,7 @@ class CPU:
             memory (Memory): The memory object where data will be written.
             address (int): The memory address where the accumulator data will be stored.
         """
-        print(f"STORE {address}")
-        memory.write(address, int(str(self.acc)))  # Ensure acc is written as integer
+        memory.write(address, self.acc)
 
     def add(self, memory, address):
         """
@@ -162,9 +185,8 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be added to the accumulator.
         """
-        print(f"ADD {address}")
-        operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) + operand:+05d}")
+        other = memory.read(address)
+        self.acc = self.acc + other
 
     def subtract(self, memory, address):
         """
@@ -173,7 +195,6 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be subtracted from the accumulator.
         """
-        print(f"SUBTRACT {address}")
         operand = int(str(memory.read(address)))
         self.acc = Opcode(f"{int(str(self.acc)) - operand:+05d}")
 
@@ -184,9 +205,8 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be multiplied with the accumulator.
         """
-        print(f"MULTIPLY {address}")
-        operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) * operand:+05d}")
+        other = memory.read(address)
+        self.acc = self.acc * other
 
     def divide(self, memory, address):
         """
@@ -195,11 +215,10 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address from which the data will be used to divide the accumulator.
         """
-        print(f"DIVIDE {address}")
-        divisor = int(str(memory.read(address)))
+        divisor = memory.read(address)
         if divisor == 0:
             raise ZeroDivisionError("Cannot divide by zero")
-        self.acc = Opcode(f"{int(str(self.acc)) // divisor:+05d}")
+        self.acc = self.acc // divisor
 
     def branch(self, memory, address):
         """
@@ -209,19 +228,16 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
-        print(f"BRANCH {address}")
         self.current = address
 
     def branchneg(self, memory, address):
         """
-        Branch to a specific location in memory if the accumulator is negative.
-        
+        Branch to a specific location in memory if the accumulator is negative.        
         Args:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
-        print(f"BRANCHNEG {address}")
-        if int(str(self.acc)) < 0:
+        if self.acc < 0:
             self.current = address
 
     def branchzero(self, memory, address):
@@ -232,13 +248,22 @@ class CPU:
             memory (Memory): The memory object where data will be read from.
             address (int): The memory address to branch to.
         """
-        print(f"BRANCHZERO {address}")
-        if int(str(self.acc)) == 0:
+        if self.acc == 0:
             self.current = address
 
     def halt(self):
-        print(f"HALT")
         self.halted = True
 
     def noop(self):
         pass
+
+    def step(self, memory, io_device):
+        """
+        Execute a single instruction.
+        """
+        if self.current not in Memory.ADDRESSABLE_SPACE:
+            self.halted = True
+        else:
+            current_opcode = memory.read(self.current)
+            self.process(current_opcode, memory, io_device)
+            self.current += 1

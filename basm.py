@@ -1,18 +1,7 @@
-"""
-A BasicML assembler.
-
-This executable accepts a BasicML program as its input and produces an assembled selection of machine code for the UVSim CPU.
-
-Usage:
-
-```
-$ basm foo.bml
-Working...
-Wrote assembled program to foo.basm
-```
-"""
+#!/usr/bin/env python
 
 from sys import argv
+from src.opcodes import Opcode
 
 def main():
     """
@@ -22,22 +11,37 @@ def main():
         print("Please specify a BasicML program to assemble")
         exit(1)
 
-    filename = argv[0]
-    program = read_file(filename)
-    assemble(program, filename)
+    input_filename = argv[1]
+    program = read_file(input_filename)
+    assemble(program, "a.out.basm")
 
 def read_file(filename):
     """
     Given a filename as its input, take each line of the program and return a list of its instructions
     """
-    with open(filename) as program:
-        pass
+    code = []
+    with open(filename, 'r') as program:
+        for line in program:
+            opcode = Opcode(line)
+            code.append(opcode)
+
+    return code
+
 
 def assemble(program, filename):
     """
     Walk through a program in BasicML and translate each instruction into its machine code equivalent
     """
-    pass
+    with open(filename, 'w') as output_file:
+        counter = 0
+        for opcode in program:
+            if opcode.name == "NOOP":
+                output_file.write(f"{counter:02d} {opcode}\n")
+            else:
+                output_file.write(f"{counter:02d} {opcode.name} {opcode.operand}\n")
+            counter += 1
+
+    print(f"Wrote disassembled program to {filename}")
 
 if __name__ == '__main__':
     main()

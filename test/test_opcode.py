@@ -145,12 +145,6 @@ def test_add_negative_and_negative():
     result = op1 + op2
     assert result == Opcode("-2000")
 
-def test_overflow():
-    op1 = Opcode("+9999")
-    op2 = Opcode("+0001")
-    with pytest.raises(OverflowError):
-        result = op1 + op2
-
 ################
 # Subtraction: #
 ################
@@ -166,12 +160,6 @@ def test_subtract_a_negative():
     op2 = Opcode("-1000")
     result = op1 - op2
     assert result == Opcode("+1000")
-
-def test_underflow():
-    op1 = Opcode("-9999")
-    op2 = Opcode("+0001")
-    with pytest.raises(OverflowError):
-        result = op1 - op2
 
 ###################
 # Multiplication: #
@@ -209,3 +197,61 @@ def test_opcode_div_with_remainder():
     op2 = Opcode("+0002")
     result = op1 / op2
     assert result == Opcode("+0002")
+
+
+#############
+# Overflow: #
+#############
+
+def test_overflow_addition():
+    op1 = Opcode("+9999")
+    op2 = Opcode("+0002")
+
+    result = op1 + op2
+
+    assert result == Opcode("+0001")
+
+def test_underflow_subtraction():
+    op1 = Opcode("-9999")
+    op2 = Opcode("+0002")
+
+    result = op1 - op2
+
+    print(f"result: {result}")
+    assert result == Opcode("-0001")
+
+def test_overflow_product():
+    op1 = Opcode("+9999")
+    op2 = Opcode("+0010")
+
+    result = op1 * op2
+
+    print(f"{op1} * {op2} == {result.numeric}")
+    assert result == Opcode("+9990")
+
+def test_underflow_product():
+    op1 = Opcode("-9999")
+    op2 = Opcode("+0002")
+
+    result = op1 * op2
+    print(f"{op1} * {op2} == {result.numeric}")
+
+    assert result == Opcode("-9998")
+
+##################
+# Human Readable #
+##################
+
+def test_named_opcode():
+    write_op = Opcode("+1101")
+    read_op = Opcode("+1002")
+
+    assert write_op.human_friendly == "WRITE 01"
+    assert read_op.human_friendly == "READ 02"
+
+def test_unamed_opcode():
+    op1 = Opcode("-0001")
+    op2 = Opcode("+7700")
+
+    assert op1.human_friendly == "NOOP"
+    assert op2.human_friendly == "NOOP"
