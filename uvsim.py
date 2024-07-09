@@ -53,3 +53,20 @@ class UVSim:
         except KeyboardInterrupt:
             print("\nAborting...")
             exit(0)
+
+    def store(self, filename):
+        """
+        Store the contents of memory to a file
+        """
+        with open(filename, 'w') as program:
+            print(f"Storing program to file... {filename} \n")
+            counter = len(self.mem) - 1
+            while counter > 0:
+                if self.mem.read(counter).raw != '+0000':
+                    break
+                counter -= 1
+            for i in range(counter):
+                program.write(self.mem.read(i).raw + '\n')
+            program.write(self.mem.read(i+1).raw)
+            print("Program stored successfully.")
+            
