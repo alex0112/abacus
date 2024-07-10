@@ -243,7 +243,9 @@ class Window:
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         select_test_file_button.pack(pady=5)
 
-        save_test_file_button = tk.Button(program_control_panel, text="Save Test File", command=self.store_file)
+        save_test_file_button = tk.Button(program_control_panel, text="Save Test File", command=self.store_file,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
 
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
