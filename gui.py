@@ -8,6 +8,7 @@ class Window:
         self.root = root
         self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
+        self.simulation_running = False
 
         self.default_primary_color = "#275D38"
         self.default_off_color = "#FFFFFF"
@@ -132,12 +133,14 @@ class Window:
         self.update_main_control_frame()
 
     def tk_reader(self):
+        self.prompt_label.config(text="Please input a four digit command or a four digit value.")
         self.input_var.set("")
         self.user_input_entry.focus()
         self.root.wait_variable(self.input_var)
+        self.prompt_label.config(text="")
         return self.input_var.get()
 
-    def submit_input(self):
+    def submit_input(self, event=None):
         user_input = self.user_input_entry.get()
         self.user_input_entry.delete(0, tk.END)
         self.input_var.set(user_input)
@@ -148,6 +151,13 @@ class Window:
     def tk_out_line(self, text):
         self.current_instruction_label.config(text=text)
 
+    def halt(self):
+        self.simulation_running = False
+        self.uvsim.cpu.current = 0
+        self.update_main_control_frame()
+
+
+        # Title Screen Frame
     def title_screen_frame(self):
         self.title_frame = tk.Frame(self.root, bg=self.primary_color)
         self.title_frame.pack()
@@ -221,6 +231,7 @@ class Window:
                                           bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         step_execution_button.pack(pady=5)
+
 
         halt_button = tk.Button(program_control_panel, text="Halt", command=self.halt_simulation,
                                 bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
