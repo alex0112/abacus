@@ -21,6 +21,11 @@ This project on the `feature/gui` branch, enhances the UVSim virtual machine sim
 4. **Help / Instructions Frame**:
    - Displays a helpful screen with instructions and further clarification about how to run the program.
 
+5. **Color Customization Frame**:
+   - Allows users to customize the primary and off colors of the interface.
+   - Provides an option to reset colors to the default system preferences (background color: #275D38, font color: #FFFFFF).
+
+
 ## Installation
 
 ### Prerequisites
@@ -167,18 +172,30 @@ The Help / Instructions page covers the following topics:
 - File Selection: Guidance on how to browse and load files from the bml_examples\ folder.
 - Main Control Functions: Detailed explanations of the functionalities available within the Main Control Frame
 - Troubleshooting: Common issues and their solutions to ensure a smooth user experience.
-    
 
-## What’s Still Left to Implement:
+### GUI Color Customization 
 
-### Memory Display Format:
-- The memory display needs to show a formatted view that matches the wireframe, showing the memory addresses and their contents.
+<img src="./assets/images/color-selection-frame.png" width="400">
 
-### Output Panel Integration:
-- The output panel should display the results of the operations.
+#### Accessing the Color Customization Frame
+From the Title Frame, click on the `Color Selection` button to open the Color Customization frame.
 
-### Current Instruction Panel:
-- The current instruction panel should be updated to reflect the instruction being executed.
+#### Change Colors Button
 
-### Debugging and Error Handling:
-- Ensure all components handle errors gracefully, with appropriate messages displayed to the user.
+<img src="./assets/images/change-colors-frame.png" width="400">
+
+
+1. In the Color Customization frame, click on the `Change Colors` button.
+2. Select your preferred Primary and Off colors using the color chooser dialogs.
+3. The application will restart with the new colors applied:
+
+      <img src="./assets/images/changed-colors-frame.png" width="400">
+
+
+
+#### Reset Colors Button
+1. In the Color Customization frame, click on the `Reset Colors` button.
+2. The colors will revert to the default system preferences (background color: #275D38, font color: #FFFFFF).
+3. The application will restart with the default colors.
+
+      <img src="./assets/images/default-bg-frame.png" width="400">
