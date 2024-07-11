@@ -113,6 +113,24 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
+    def update_memory(self, address, value):
+        '''Update the memory with the new value at the given address.'''
+        # Prints to console for testing purposes
+        previous_value = self.uvsim.mem.read(address)
+        try:
+            if value == '':
+                value = '0000'
+            self.uvsim.mem.write(address, self.uvsim.Opcode(value))
+            print(f"Updated address {address} with value {value}")
+        except ValueError as e:
+            print(f"Error updating memory: {e}")
+            self.uvsim.mem.write(address, previous_value)
+            #TODO create update to feedback to user that the value is invalid
+            #TODO update text box of value of address back to previous value if invalid
+        #TODO update the memory display frame with the new (or previous if failed) value with current instruction highlighted
+
+
+
     def update_main_control_frame(self):
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()

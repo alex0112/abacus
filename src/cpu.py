@@ -69,6 +69,15 @@ class CPU:
                 lines.append(f"    {address:02d}   {opcode}   {opcode.human_friendly}")
 
         return "\n\n" + "\n".join(lines)
+    
+    def gui_preview_state(self, mem):
+        """Create a list of dictionaries containing the current state of the memory for the GUI"""
+        content = []
+        for address, opcode in mem.memory.items():
+            content.append([address, opcode, opcode.human_friendly])
+        return content
+    
+    
 
     def run(self, memory, io_device, address=0, preview=False):
         """
