@@ -73,7 +73,7 @@ class CPU:
     def gui_preview_state(self, mem):
         """Create a list of dictionaries containing the current state of the memory for the GUI"""
         content = []
-        for address, opcode in mem.memory.items():
+        for address, opcode in mem.mem.items():
             content.append([address, opcode, opcode.human_friendly])
         return content
     
