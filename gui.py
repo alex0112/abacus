@@ -115,31 +115,51 @@ class Window:
         self.uvsim.store(file_path)
 
 
-    def update_main_control_frame(self):
-        for widget in self.memory_display_frame.winfo_children():
-            widget.destroy()
-
-        memory_contents = self.uvsim.cpu.preview_state(self.uvsim.mem)
-        memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10),
-                                bg=self.primary_color, fg=self.off_color)
-        memory_label.pack(padx=10, pady=(10, 0))
-
-        self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
-
     # def update_main_control_frame(self):
-    #     for widget in self.memory_inner_frame.winfo_children():
+    #     for widget in self.memory_display_frame.winfo_children():
     #         widget.destroy()
-    #     contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-    #     for slot in range(len(contents)):
-    #         memory_address_label = tk.Label(self.memory_inner_frame, text=contents[slot][0], font=("Courier", 10),
-    #                                         bg=self.primary_color, fg=self.off_color)
-    #         memory_address_label.grid(row=slot, column=0, padx=10, pady=5)
-    #         memory_value_label = tk.Label(self.memory_inner_frame, text=contents[slot][1], font=("Courier", 10),
-    #                                       bg=self.primary_color, fg=self.off_color)
-    #         memory_value_label.grid(row=slot, column=0, padx=10, pady=5)
-    #         memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=contents[slot][2], font=("Courier", 10),
-    #                                               bg=self.primary_color, fg=self.off_color)
-    #         memory_value_friendly_label.grid(row=slot, column=0, padx=10, pady=5)
+
+    #     memory_contents = self.uvsim.cpu.preview_state(self.uvsim.mem)
+    #     memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10),
+    #                             bg=self.primary_color, fg=self.off_color)
+    #     memory_label.pack(padx=10, pady=(10, 0))
+
+    #     self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
+
+    def update_main_control_frame(self):
+        for widget in self.memory_inner_frame.winfo_children():
+            widget.destroy()
+        contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+
+        def modify_memory(slot, entry):
+            try:
+                entry = int(entry)
+                self.uvsim.mem.write(slot[0], entry)
+                self.update_main_control_frame()
+                print("Memory updated.")
+            except ValueError as e:
+                messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
+                self.update_main_control_frame()
+        def on_click(slot, label):
+            print(f"addres changed: {slot[0]}")
+            label.forget()
+            entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
+            entry.insert(0, slot[1])
+            entry.bind("<Return>", lambda event: modify_memory(slot, entry.get()))
+            entry.grid(row=slot[0], column=1, padx=10, pady=5)
+
+
+        for slot in contents:
+            memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
+                                            bg=self.primary_color, fg=self.off_color)
+            memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
+            memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
+                                          bg=self.primary_color, fg=self.off_color)
+            memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
+            memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: on_click(slot, label))
+            memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
+                                                  bg=self.primary_color, fg=self.off_color)
+            memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
 
 
     def start_simulation(self):
@@ -277,17 +297,17 @@ class Window:
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        # memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0) #
-        # memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+        memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0) #
+        memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        # memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=memory_canvas.yview)
-        # memory_scrollbar.pack(side=tk.RIGHT, fill='y')
+        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=memory_canvas.yview)
+        memory_scrollbar.pack(side=tk.RIGHT, fill='y')
         
-        # memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
-        # memory_canvas.bind('<Configure>', lambda e: memory_canvas.configure(scrollregion=memory_canvas.bbox("all")))
+        memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
+        memory_canvas.bind('<Configure>', lambda e: memory_canvas.configure(scrollregion=memory_canvas.bbox("all")))
 
-        # self.memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color)
-        # memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+        self.memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color)
+        memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
 
         control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
