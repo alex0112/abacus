@@ -93,7 +93,7 @@ class Window:
         self.root.update_idletasks()  # Force the window to update its size
 
     def browse_files(self):
-        file_path = filedialog.askopenfilename(initialdir="./bml_examples", title="Select a File",
+        file_path = filedialog.askopenfilename(initialdir="/", title="Select a File",
                                                filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.file_entry.delete(0, tk.END)
         self.file_entry.insert(0, file_path)
