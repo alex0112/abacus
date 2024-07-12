@@ -195,3 +195,32 @@ def test_preview_end_even():
     mem.write(99, Opcode("+0099"))
 
     assert mem.preview(99, 4) == {95: Opcode("+0095"), 96: Opcode("+0096"), 97: Opcode("+0097"), 98: Opcode("+0098"), 99: Opcode("+0099")}
+
+def test_memory_iteration():
+    mem = Memory()
+
+
+    mem.write(0, Opcode("+0000"))
+    mem.write(1, Opcode("+0001"))
+
+    mem.write(95, Opcode("+0095"))
+    mem.write(96, Opcode("+0096"))
+    mem.write(97, Opcode("+0097"))
+    mem.write(98, Opcode("+0098"))
+    mem.write(99, Opcode("+0099"))
+
+
+    result = []
+
+    for opcode in mem:
+        result.append(opcode)
+
+    assert len(result) == 100
+    assert result[0] == Opcode("+0000")
+    assert result[1] == Opcode("+0001")
+
+    assert result[42] == Opcode("+0000")
+
+    assert result[98] == Opcode("+0098")
+    assert result[99] == Opcode("+0099")
+    
