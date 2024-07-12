@@ -114,23 +114,6 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
-    def update_memory(self, address, value):
-        '''Update the memory with the new value at the given address.'''
-        # Prints to console for testing purposes
-        previous_value = self.uvsim.mem.read(address)
-        try:
-            if value == '':
-                value = '0000'
-            self.uvsim.mem.write(address, self.uvsim.Opcode(value))
-            print(f"Updated address {address} with value {value}")
-        except ValueError as e:
-            print(f"Error updating memory: {e}")
-            self.uvsim.mem.write(address, previous_value)
-            #TODO create update to feedback to user that the value is invalid
-            #TODO update text box of value of address back to previous value if invalid
-        #TODO update the memory display frame with the new (or previous if failed) value with current instruction highlighted
-
-
 
     def update_main_control_frame(self):
         for widget in self.memory_display_frame.winfo_children():
@@ -142,6 +125,22 @@ class Window:
         memory_label.pack(padx=10, pady=(10, 0))
 
         self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
+
+    # def update_main_control_frame(self):
+    #     for widget in self.memory_inner_frame.winfo_children():
+    #         widget.destroy()
+    #     contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+    #     for slot in range(len(contents)):
+    #         memory_address_label = tk.Label(self.memory_inner_frame, text=contents[slot][0], font=("Courier", 10),
+    #                                         bg=self.primary_color, fg=self.off_color)
+    #         memory_address_label.grid(row=slot, column=0, padx=10, pady=5)
+    #         memory_value_label = tk.Label(self.memory_inner_frame, text=contents[slot][1], font=("Courier", 10),
+    #                                       bg=self.primary_color, fg=self.off_color)
+    #         memory_value_label.grid(row=slot, column=0, padx=10, pady=5)
+    #         memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=contents[slot][2], font=("Courier", 10),
+    #                                               bg=self.primary_color, fg=self.off_color)
+    #         memory_value_friendly_label.grid(row=slot, column=0, padx=10, pady=5)
+
 
     def start_simulation(self):
         self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
@@ -279,6 +278,18 @@ class Window:
 
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
+
+        # memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0) #
+        # memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+
+        # memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=memory_canvas.yview)
+        # memory_scrollbar.pack(side=tk.RIGHT, fill='y')
+        
+        # memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
+        # memory_canvas.bind('<Configure>', lambda e: memory_canvas.configure(scrollregion=memory_canvas.bbox("all")))
+
+        # self.memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color)
+        # memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
 
         control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
