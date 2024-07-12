@@ -8,6 +8,7 @@ class Window:
         self.root = root
         self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
+        self.simulation_running = False
 
         self.default_primary_color = "#275D38"
         self.default_off_color = "#FFFFFF"
@@ -119,10 +120,16 @@ class Window:
         self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
 
     def start_simulation(self):
-        self.uvsim.cpu.run(self.uvsim.mem, self.uvsim.io_device)
-        self.update_main_control_frame()
+        self.simulation_running = True
+        self.run_simulation_step()
+
+    def run_simulation_step(self):
+        if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
+            self.execute_step()
+            self.root.after(200, self.run_simulation_step)
 
     def halt_simulation(self):
+        self.simulation_running = False
         self.uvsim.cpu.halted = True
         self.update_main_control_frame()
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
@@ -132,12 +139,14 @@ class Window:
         self.update_main_control_frame()
 
     def tk_reader(self):
+        self.prompt_label.config(text="Please input a four digit command or a four digit value.")
         self.input_var.set("")
         self.user_input_entry.focus()
         self.root.wait_variable(self.input_var)
+        self.prompt_label.config(text="")
         return self.input_var.get()
 
-    def submit_input(self):
+    def submit_input(self, event=None):
         user_input = self.user_input_entry.get()
         self.user_input_entry.delete(0, tk.END)
         self.input_var.set(user_input)
@@ -222,7 +231,7 @@ class Window:
                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         step_execution_button.pack(pady=5)
 
-        halt_button = tk.Button(program_control_panel, text="Halt", command=self.halt_simulation,
+        halt_button = tk.Button(program_control_panel, text="Pause", command=self.halt_simulation,
                                 bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                 highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         halt_button.pack(pady=5)
@@ -277,6 +286,10 @@ class Window:
                                  bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                  highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         input_button.pack(padx=10, pady=(10, 0))
+
+        self.prompt_label = tk.Label(user_input_panel, text="Input: ", font=("Courier", 12),
+                                    bg=self.primary_color, fg=self.off_color)
+        self.prompt_label.pack(side=tk.LEFT, padx=10, pady=(10, 0))
 
     def change_colors(self):
         primary_color = colorchooser.askcolor(title="Choose Primary Color")[1]
