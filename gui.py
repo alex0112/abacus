@@ -126,6 +126,30 @@ class Window:
 
     #     self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
 
+    def edit_memory(self):
+        for widget in self.memory_display_frame.winfo_children():
+            widget.destroy()
+        edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0)
+        edit_memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+
+        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=edit_memory_canvas.yview)
+        memory_scrollbar.pack(side=tk.RIGHT, fill='y')
+        
+        edit_memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
+        edit_memory_canvas.bind('<Configure>', lambda e: edit_memory_canvas.configure(scrollregion=edit_memory_canvas.bbox("all")))
+
+        edit_memory_inner_frame = tk.Frame(edit_memory_canvas, bg=self.primary_color)
+        edit_memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+
+        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color)
+        text_to_show = ""
+        content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+        for thing in content:
+            text_to_show += f"{thing[1]}\n"
+        edit_field.insert(tk.END, text_to_show)
+        edit_field.pack(padx=10, pady=10)
+
+
     def update_main_control_frame(self):
         for widget in self.memory_inner_frame.winfo_children():
             widget.destroy()
@@ -141,7 +165,6 @@ class Window:
                 messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
                 self.update_main_control_frame()
         def on_click(slot, label):
-            print(f"addres changed: {slot[0]}")
             label.forget()
             entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
             entry.insert(0, slot[1])
@@ -293,6 +316,11 @@ class Window:
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
+
+        advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        advanced_editor_button.pack(pady=5)
 
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
