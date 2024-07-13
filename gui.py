@@ -114,51 +114,40 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
+    
+    def submit_memory_edit(self):
+        opcode_list = []
+        text_content = self.edit_field.get("1.0", tk.END).strip().split("\n")
+        try:
+            for line in text_content:
+                line = Opcode(line)
+                opcode_list.append(line)
+            if len(opcode_list) - 1 not in self.uvsim.mem.ADDRESSABLE_SPACE:
+                raise ValueError("Too many opcodes")
+            for address in range(len(opcode_list)):
+                self.uvsim.mem.write(address, opcode_list[address])
+            print("memory updated succesfully")
+            self.update_main_control_frame()
+            self.advanced_editor_button.config(text="Advanced Edit", command=self.edit_memory)
+        except ValueError as e:
+            print(f"text passed invalid: {e}")
+            messagebox.showerror("Error", f"The submited code is invalid.\n{e}")
+
 
     def edit_memory(self):
-        def submit_memory_edit():
-            opcode_list = []
-            text_content = edit_field.get("1.0", tk.END).strip().split("\n")
-            try:
-                for line in text_content:
-                    print(line)
-                    line = Opcode(line)
-                    opcode_list.append(line)
-                print("opcodes were all valid")
-            except ValueError as e:
-                print(f"text passed invalid: {e}")
-
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-        self.advanced_editor_button.config(text="Submit Changes", command=submit_memory_edit)
-        
-        print(f"length of content: {len(content)}")
-        for widget in self.memory_display_frame.winfo_children():
+        self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
+        for widget in self.memory_inner_frame.winfo_children():
             widget.destroy()
-        edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
-        edit_memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
-
-        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=edit_memory_canvas.yview)
-        memory_scrollbar.pack(side=tk.RIGHT, fill='y')
-        
-        edit_memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
-        edit_memory_canvas.bind('<Configure>', lambda e: edit_memory_canvas.configure(scrollregion=edit_memory_canvas.bbox("all")))
-
-        edit_memory_inner_frame = tk.Frame(edit_memory_canvas, bg=self.primary_color)
-        edit_memory_canvas.create_window((0, 0), window=edit_memory_inner_frame, anchor='nw')
-
-        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=5, height=16)
+        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor='nw')
+        self.edit_field = tk.Text(self.memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
-        edit_field.insert(tk.END, text_to_show)
-        edit_field.grid(row=0, column=1, padx=10, pady=4)
+        self.edit_field.insert(tk.END, text_to_show)
+        self.edit_field.grid(row=0, column=1, padx=10, pady=4)
 
-    def update_main_control_frame(self):
-        for widget in self.memory_inner_frame.winfo_children():
-            widget.destroy()
-        contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-
-        def modify_memory(slot, entry):
+    def modify_memory(self, slot, entry):
             try:
                 entry = int(entry)
                 self.uvsim.mem.write(slot[0], entry)
@@ -167,13 +156,17 @@ class Window:
             except ValueError as e:
                 messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
                 self.update_main_control_frame()
-        def on_click(slot, label):
-            label.forget()
-            entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
-            entry.insert(0, slot[1])
-            entry.bind("<Return>", lambda event: modify_memory(slot, entry.get()))
-            entry.grid(row=slot[0], column=1, padx=10, pady=5)
+    def on_click(self, slot, label):
+        label.forget()
+        entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
+        entry.insert(0, slot[1])
+        entry.bind("<Return>", lambda event: self.modify_memory(slot, entry.get()))
+        entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
+    def update_main_control_frame(self):
+        for widget in self.memory_inner_frame.winfo_children():
+            widget.destroy()
+        contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
 
         for slot in contents:
             memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
@@ -182,7 +175,7 @@ class Window:
             memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
                                           bg=self.primary_color, fg=self.off_color)
             memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
-            memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: on_click(slot, label))
+            memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
             memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
                                                   bg=self.primary_color, fg=self.off_color)
             memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
@@ -329,17 +322,17 @@ class Window:
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
-        memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+        self.memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
+        self.memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=memory_canvas.yview)
+        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=self.memory_canvas.yview)
         memory_scrollbar.pack(side=tk.RIGHT, fill='y')
         
-        memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
-        memory_canvas.bind('<Configure>', lambda e: memory_canvas.configure(scrollregion=memory_canvas.bbox("all")))
+        self.memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
+        self.memory_canvas.bind('<Configure>', lambda e: self.memory_canvas.configure(scrollregion=self.memory_canvas.bbox("all")))
 
-        self.memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color)
-        memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+        self.memory_inner_frame = tk.Frame(self.memory_canvas, bg=self.primary_color)
+        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
 
         control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
