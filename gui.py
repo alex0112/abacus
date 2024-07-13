@@ -155,16 +155,21 @@ class Window:
         self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
         for widget in self.memory_inner_frame.winfo_children():
             widget.destroy()
-    
-        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
+            
         self.edit_field = tk.Text(self.memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
-
-        self.memory_display_frame.update_idletasks()
+        self.edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
+        
+        self.memory_inner_frame.grid_columnconfigure(0, weight=1)
+        self.memory_inner_frame.grid_rowconfigure(0, weight=1)
+        
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
         self.edit_field.insert(tk.END, text_to_show)
-        self.edit_field.grid(row=0, column=0, padx=10, pady=4)
+        
+        self.memory_inner_frame.update_idletasks()
+        self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+
 
     def modify_memory(self, slot, entry):
             try:
@@ -184,23 +189,27 @@ class Window:
         entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
     def update_main_control_frame(self):
-        for widget in self.memory_inner_frame.winfo_children():
-                widget.destroy()
-        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
-        contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-
-        for slot in contents:
-            memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
-                                            bg=self.primary_color, fg=self.off_color)
-            memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
-            memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
-                                          bg=self.primary_color, fg=self.off_color)
-            memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
-            memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
-            memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
-                                                  bg=self.primary_color, fg=self.off_color)
-            memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
-        self.highlight_current_instruction()
+     for widget in self.memory_inner_frame.winfo_children():
+         widget.destroy()
+     
+     contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+     self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
+     
+     for slot in contents:
+         memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
+                                         bg=self.primary_color, fg=self.off_color)
+         memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
+         memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
+                                       bg=self.primary_color, fg=self.off_color)
+         memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
+         memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
+         memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
+                                               bg=self.primary_color, fg=self.off_color)
+         memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
+     
+     self.memory_inner_frame.update_idletasks()
+     self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+     self.highlight_current_instruction()
 
 
     def start_simulation(self):
