@@ -181,10 +181,9 @@ class Window:
         if not self.uvsim.cpu.halted:
             for widget in self.memory_inner_frame.winfo_children():
                 widget.destroy()
-     
+            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
             contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
             self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
-     
             for slot in contents:
                 memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
                                          bg=self.primary_color, fg=self.off_color)
