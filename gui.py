@@ -129,7 +129,7 @@ class Window:
     def edit_memory(self):
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
-        edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0)
+        edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
         edit_memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
         memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=edit_memory_canvas.yview)
@@ -148,7 +148,7 @@ class Window:
             text_to_show += f"{thing[1]}\n"
         edit_field.insert(tk.END, text_to_show)
         edit_field.pack(padx=10, pady=10)
-
+        #TODO fix error when trying display text to memory display
 
     def update_main_control_frame(self):
         for widget in self.memory_inner_frame.winfo_children():
@@ -325,7 +325,7 @@ class Window:
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0) #
+        memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
         memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
         memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=memory_canvas.yview)
