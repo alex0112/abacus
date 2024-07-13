@@ -114,19 +114,8 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
-
-    # def update_main_control_frame(self):
-    #     for widget in self.memory_display_frame.winfo_children():
-    #         widget.destroy()
-
-    #     memory_contents = self.uvsim.cpu.preview_state(self.uvsim.mem)
-    #     memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10),
-    #                             bg=self.primary_color, fg=self.off_color)
-    #     memory_label.pack(padx=10, pady=(10, 0))
-
-    #     self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
-
     def edit_memory(self):
+
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
         self.memory_display_frame.config(width=150)

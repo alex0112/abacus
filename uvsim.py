@@ -58,15 +58,27 @@ class UVSim:
         """
         Store the contents of memory to a file
         """
+
+        # Find the index of the last non-empty opcode
+        last_non_empty_index = -1
+        for i in range(len(self.mem) - 1, -1, -1):
+            if str(self.mem[i]) != '+0000':
+                last_non_empty_index = i
+                break
+
+        # Write opcodes to the file, including intermediate empty ones
         with open(filename, 'w') as program:
-            print(f"Storing program to file... {filename} \n")
-            counter = len(self.mem) - 1
-            while counter > 0:
-                if self.mem.read(counter).raw != '+0000':
-                    break
-                counter -= 1
-            for i in range(counter):
-                program.write(self.mem.read(i).raw + '\n')
-            program.write(self.mem.read(i+1).raw)
-            print("Program stored successfully.")
+            for i, opcode in enumerate(self.mem):
+                if i <= last_non_empty_index:
+                    program.write(str(opcode) + "\n")
+
+
             
+            print('Program saved successfully')
+            
+
+            
+
+        
+
+
