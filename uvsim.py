@@ -53,3 +53,31 @@ class UVSim:
         except KeyboardInterrupt:
             print("\nAborting...")
             exit(0)
+
+    def store(self, filename):
+        """
+        Store the contents of memory to a file
+        """
+        # Find the index of the last non-empty opcode
+        last_non_empty_index = -1
+        for i in range(len(self.mem) - 1, -1, -1):
+            if str(self.mem[i]) != '+0000':
+                last_non_empty_index = i
+                break
+
+        # Write opcodes to the file, including intermediate empty ones
+        with open(filename, 'w') as program:
+            for i, opcode in enumerate(self.mem):
+                if i <= last_non_empty_index:
+                    program.write(str(opcode) + "\n")
+
+
+            
+            print('Program saved successfully')
+            
+
+            
+
+        
+
+

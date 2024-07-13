@@ -108,6 +108,12 @@ class Window:
             self.update_main_control_frame()
             self.root.update_idletasks()  # Force the window to update its size
 
+    def store_file(self):
+        '''Store the contents of memory to a file using the file dialog.'''
+        file_path = filedialog.asksaveasfilename(initialdir="./bml_examples", title="Save File",
+                                                    filetypes=(("Text files", ".txt"), ("all files", ".*")))
+        self.uvsim.store(file_path)
+
     def update_main_control_frame(self):
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
@@ -245,6 +251,11 @@ class Window:
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         select_test_file_button.pack(pady=5)
+
+        save_test_file_button = tk.Button(program_control_panel, text="Save Test File", command=self.store_file,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        save_test_file_button.pack(pady=5)
 
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
