@@ -114,11 +114,21 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
-    def edit_memory(self):
 
+    def submit_memory_edit(self):
+        pass
+
+    def edit_memory(self):
+        #TODO: reset advanced editor button to be now the submit button
+        # self.main_control_frame.top_frame.program_control_panel.advanced_editor_button.pack_forget()
+        # submit_button = tk.Button(self.main_control_frame.top_frame.program_control_panel, text="Submit changes", command=self.submit_memory_edit,
+        #                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+        #                              highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        #submit_button.pack(pady=5)
+        content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+        print(f"length of content: {len(content)}")
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
-        self.memory_display_frame.config(width=150)
         edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
         edit_memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
@@ -131,13 +141,12 @@ class Window:
         edit_memory_inner_frame = tk.Frame(edit_memory_canvas, bg=self.primary_color)
         edit_memory_canvas.create_window((0, 0), window=edit_memory_inner_frame, anchor='nw')
 
-        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=5)
+        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=5, height=16)
         text_to_show = ""
-        content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
         for thing in content:
             text_to_show += f"{thing[1]}\n"
         edit_field.insert(tk.END, text_to_show)
-        edit_field.pack(padx=10, pady=10)
+        edit_field.grid(row=0, column=1, padx=10, pady=4)
         #TODO fix error when trying display text to memory display
 
     def update_main_control_frame(self):
@@ -173,6 +182,7 @@ class Window:
             memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
                                                   bg=self.primary_color, fg=self.off_color)
             memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
+        #highlight current address that cpu is pointing to
 
 
     def start_simulation(self):
