@@ -151,7 +151,7 @@ Proposed concept for Main Control framework:
       Description: Shows the current instruction being executed (e.g., +1007).
 
 6. **User Input Panel**:
-      Function: Allows user to enter data when prompted by the program.
+      Function: Allows user to enter data when prompted by the program. Allows inputing by pressing Enter.
 
       Description: Input field for user inputs (e.g., for READ instructions).
 
