@@ -1,7 +1,7 @@
 import json
 import tkinter as tk
 from tkinter import filedialog, colorchooser, messagebox
-from uvsim import UVSim
+from uvsim import UVSim, Opcode
 
 class Window:
     def __init__(self, root):
@@ -105,8 +105,13 @@ class Window:
             self.uvsim.load(file_path)
             self.file_selection_frame.pack_forget()
             self.main_control_frame.pack(padx=20, pady=20)
+            for widget in self.memory_inner_frame.winfo_children():
+                widget.destroy()
+            self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
             self.update_main_control_frame()
             self.root.update_idletasks()  # Force the window to update its size
+            self.uvsim.cpu.current = 0
+            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
     
     def store_file(self):
         '''Store the contents of memory to a file using the file dialog.'''
@@ -114,47 +119,59 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
+    
+    def highlight_current_instruction(self):
+        #fix so it actually updates the current instruction to be highlighted
+        current_address = self.uvsim.cpu.current
+        for widget in self.memory_inner_frame.winfo_children():
+            if isinstance(widget, tk.Label):
+                #check current content of Label
+                if widget.cget("text") == f"{str(current_address)}":
+                    widget.config(bg=self.off_color, fg=self.primary_color)
+                else:
+                    widget.config(bg=self.primary_color, fg=self.off_color)
 
     def submit_memory_edit(self):
-        pass
+        opcode_list = []
+        text_content = self.edit_field.get("1.0", tk.END).strip().split("\n")
+        try:
+            for line in text_content:
+                line = Opcode(line)
+                opcode_list.append(line)
+            if len(opcode_list) - 1 not in self.uvsim.mem.ADDRESSABLE_SPACE:
+                raise ValueError("Too many opcodes")
+            for address in range(len(opcode_list)):
+                self.uvsim.mem.write(address, opcode_list[address])
+            print("memory updated succesfully")
+            self.update_main_control_frame()
+            self.advanced_editor_button.config(text="Advanced Edit", command=self.edit_memory)
+        except ValueError as e:
+            print(f"text passed invalid: {e}")
+            messagebox.showerror("Error", f"The submited code is invalid.\n{e}")
+
 
     def edit_memory(self):
-        #TODO: reset advanced editor button to be now the submit button
-        # self.main_control_frame.top_frame.program_control_panel.advanced_editor_button.pack_forget()
-        # submit_button = tk.Button(self.main_control_frame.top_frame.program_control_panel, text="Submit changes", command=self.submit_memory_edit,
-        #                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-        #                              highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        #submit_button.pack(pady=5)
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-        print(f"length of content: {len(content)}")
-        for widget in self.memory_display_frame.winfo_children():
+        self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
+        for widget in self.memory_inner_frame.winfo_children():
             widget.destroy()
-        edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
-        edit_memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
-
-        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=edit_memory_canvas.yview)
-        memory_scrollbar.pack(side=tk.RIGHT, fill='y')
+            
+        self.edit_field = tk.Text(self.memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
+        self.edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
         
-        edit_memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
-        edit_memory_canvas.bind('<Configure>', lambda e: edit_memory_canvas.configure(scrollregion=edit_memory_canvas.bbox("all")))
-
-        edit_memory_inner_frame = tk.Frame(edit_memory_canvas, bg=self.primary_color)
-        edit_memory_canvas.create_window((0, 0), window=edit_memory_inner_frame, anchor='nw')
-
-        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=5, height=16)
+        self.memory_inner_frame.grid_columnconfigure(0, weight=1)
+        self.memory_inner_frame.grid_rowconfigure(0, weight=1)
+        
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
-        edit_field.insert(tk.END, text_to_show)
-        edit_field.grid(row=0, column=1, padx=10, pady=4)
-        #TODO fix error when trying display text to memory display
+        self.edit_field.insert(tk.END, text_to_show)
+        
+        self.memory_inner_frame.update_idletasks()
+        self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
 
-    def update_main_control_frame(self):
-        for widget in self.memory_inner_frame.winfo_children():
-            widget.destroy()
-        contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
 
-        def modify_memory(slot, entry):
+    def modify_memory(self, slot, entry):
             try:
                 entry = int(entry)
                 self.uvsim.mem.write(slot[0], entry)
@@ -163,44 +180,62 @@ class Window:
             except ValueError as e:
                 messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
                 self.update_main_control_frame()
-        def on_click(slot, label):
-            label.forget()
-            entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
-            entry.insert(0, slot[1])
-            entry.bind("<Return>", lambda event: modify_memory(slot, entry.get()))
-            entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
+    def on_click(self, slot, label):
+        label.forget()
+        entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
+        entry.insert(0, slot[1])
+        entry.bind("<Return>", lambda event: self.modify_memory(slot, entry.get()))
+        entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
-        for slot in contents:
-            memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
-                                            bg=self.primary_color, fg=self.off_color)
-            memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
-            memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
-                                          bg=self.primary_color, fg=self.off_color)
-            memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
-            memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: on_click(slot, label))
-            memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
-                                                  bg=self.primary_color, fg=self.off_color)
-            memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
-        #highlight current address that cpu is pointing to
+    def update_main_control_frame(self):
+     for widget in self.memory_inner_frame.winfo_children():
+         widget.destroy()
+     
+     contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+     self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
+     
+     for slot in contents:
+         memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
+                                         bg=self.primary_color, fg=self.off_color)
+         memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
+         memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
+                                       bg=self.primary_color, fg=self.off_color)
+         memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
+         memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
+         memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
+                                               bg=self.primary_color, fg=self.off_color)
+         memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
+     
+     self.memory_inner_frame.update_idletasks()
+     self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+     self.highlight_current_instruction()
 
 
     def start_simulation(self):
+        self.advanced_editor_button.config(state="disabled")
         self.simulation_running = True
         self.run_simulation_step()
 
     def run_simulation_step(self):
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
+            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
             self.execute_step()
             self.root.after(200, self.run_simulation_step)
 
     def halt_simulation(self):
+        self.advanced_editor_button.config(state="normal")
         self.simulation_running = False
         self.uvsim.cpu.halted = True
         self.update_main_control_frame()
+        self.uvsim.cpu.current = 0
+        self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 
+
     def execute_step(self):
+        self.advanced_editor_button.config(state="disabled")
+        self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
         self.update_main_control_frame()
 
@@ -317,25 +352,25 @@ class Window:
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
 
-        advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
+        self.advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        advanced_editor_button.pack(pady=5)
+        self.advanced_editor_button.pack(pady=5)
 
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
-        memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+        self.memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=240)
+        self.memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=memory_canvas.yview)
+        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=self.memory_canvas.yview)
         memory_scrollbar.pack(side=tk.RIGHT, fill='y')
         
-        memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
-        memory_canvas.bind('<Configure>', lambda e: memory_canvas.configure(scrollregion=memory_canvas.bbox("all")))
+        self.memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
+        self.memory_canvas.bind('<Configure>', lambda e: self.memory_canvas.configure(scrollregion=self.memory_canvas.bbox("all")))
 
-        self.memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color)
-        memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+        self.memory_inner_frame = tk.Frame(self.memory_canvas, bg=self.primary_color)
+        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
 
         control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
