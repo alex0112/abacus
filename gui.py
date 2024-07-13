@@ -105,6 +105,9 @@ class Window:
             self.uvsim.load(file_path)
             self.file_selection_frame.pack_forget()
             self.main_control_frame.pack(padx=20, pady=20)
+            for widget in self.memory_inner_frame.winfo_children():
+                widget.destroy()
+            self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
             self.update_main_control_frame()
             self.root.update_idletasks()  # Force the window to update its size
     
@@ -139,13 +142,14 @@ class Window:
         self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
         for widget in self.memory_inner_frame.winfo_children():
             widget.destroy()
+        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
         self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor='nw')
         self.edit_field = tk.Text(self.memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
         self.edit_field.insert(tk.END, text_to_show)
-        self.edit_field.grid(row=0, column=1, padx=10, pady=4)
+        self.edit_field.grid(row=0, column=0, padx=10, pady=4)
 
     def modify_memory(self, slot, entry):
             try:
@@ -156,6 +160,7 @@ class Window:
             except ValueError as e:
                 messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
                 self.update_main_control_frame()
+
     def on_click(self, slot, label):
         label.forget()
         entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
@@ -165,7 +170,8 @@ class Window:
 
     def update_main_control_frame(self):
         for widget in self.memory_inner_frame.winfo_children():
-            widget.destroy()
+                widget.destroy()
+        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
         contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
 
         for slot in contents:
