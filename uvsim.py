@@ -58,6 +58,7 @@ class UVSim:
         """
         Store the contents of memory to a file
         """
+
         # Find the index of the last non-empty opcode
         last_non_empty_index = -1
         for i in range(len(self.mem) - 1, -1, -1):
