@@ -119,17 +119,6 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
-    
-    def highlight_current_instruction(self):
-        #fix so it actually updates the current instruction to be highlighted
-        current_address = self.uvsim.cpu.current
-        for widget in self.memory_inner_frame.winfo_children():
-            if isinstance(widget, tk.Label):
-                #check current content of Label
-                if widget.cget("text") == f"{str(current_address)}":
-                    widget.config(bg=self.off_color, fg=self.primary_color)
-                else:
-                    widget.config(bg=self.primary_color, fg=self.off_color)
 
     def submit_memory_edit(self):
         opcode_list = []
@@ -200,6 +189,8 @@ class Window:
                 memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
                                          bg=self.primary_color, fg=self.off_color)
                 memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
+                if self.uvsim.cpu.current == slot[0]:
+                    memory_address_label.config(bg=self.off_color, fg=self.primary_color)
                 memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
                                        bg=self.primary_color, fg=self.off_color)
                 memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
@@ -210,7 +201,6 @@ class Window:
      
                 self.memory_inner_frame.update_idletasks()
                 self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
-                self.highlight_current_instruction()
 
     def start_simulation(self):
         self.advanced_editor_button.config(state="disabled")
@@ -219,7 +209,6 @@ class Window:
 
     def run_simulation_step(self):
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
-            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
             self.execute_step()
             self.root.after(200, self.run_simulation_step)
 
@@ -234,10 +223,11 @@ class Window:
 
 
     def execute_step(self):
+        self.update_main_control_frame() #this is causing the program to refresh memory every step which makes it take longer to load
         self.advanced_editor_button.config(state="disabled")
         self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
-        self.update_main_control_frame()
+        
 
     def tk_reader(self):
         self.prompt_label.config(text="Please input a four digit command or a four digit value.")
