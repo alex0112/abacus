@@ -129,6 +129,7 @@ class Window:
     def edit_memory(self):
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
+        self.memory_display_frame.config(width=150)
         edit_memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
         edit_memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
@@ -139,9 +140,9 @@ class Window:
         edit_memory_canvas.bind('<Configure>', lambda e: edit_memory_canvas.configure(scrollregion=edit_memory_canvas.bbox("all")))
 
         edit_memory_inner_frame = tk.Frame(edit_memory_canvas, bg=self.primary_color)
-        edit_memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+        edit_memory_canvas.create_window((0, 0), window=edit_memory_inner_frame, anchor='nw')
 
-        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color)
+        edit_field = tk.Text(edit_memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=5)
         text_to_show = ""
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
         for thing in content:
