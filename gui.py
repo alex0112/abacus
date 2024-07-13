@@ -189,28 +189,28 @@ class Window:
         entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
     def update_main_control_frame(self):
-     for widget in self.memory_inner_frame.winfo_children():
-         widget.destroy()
+        if not self.uvsim.cpu.halted:
+            for widget in self.memory_inner_frame.winfo_children():
+                widget.destroy()
      
-     contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-     self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
+            contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+            self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
      
-     for slot in contents:
-         memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
+            for slot in contents:
+                memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
                                          bg=self.primary_color, fg=self.off_color)
-         memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
-         memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
+                memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
+                memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
                                        bg=self.primary_color, fg=self.off_color)
-         memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
-         memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
-         memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
+                memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
+                memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
+                memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
                                                bg=self.primary_color, fg=self.off_color)
-         memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
+                memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
      
-     self.memory_inner_frame.update_idletasks()
-     self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
-     self.highlight_current_instruction()
-
+                self.memory_inner_frame.update_idletasks()
+                self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+                self.highlight_current_instruction()
 
     def start_simulation(self):
         self.advanced_editor_button.config(state="disabled")
