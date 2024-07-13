@@ -110,6 +110,8 @@ class Window:
             self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
             self.update_main_control_frame()
             self.root.update_idletasks()  # Force the window to update its size
+            self.uvsim.cpu.current = 0
+            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
     
     def store_file(self):
         '''Store the contents of memory to a file using the file dialog.'''
@@ -118,6 +120,17 @@ class Window:
         self.uvsim.store(file_path)
 
     
+    def highlight_current_instruction(self):
+        #fix so it actually updates the current instruction to be highlighted
+        current_address = self.uvsim.cpu.current
+        for widget in self.memory_inner_frame.winfo_children():
+            if isinstance(widget, tk.Label):
+                #check current content of Label
+                if widget.cget("text") == f"{str(current_address)}":
+                    widget.config(bg=self.off_color, fg=self.primary_color)
+                else:
+                    widget.config(bg=self.primary_color, fg=self.off_color)
+
     def submit_memory_edit(self):
         opcode_list = []
         text_content = self.edit_field.get("1.0", tk.END).strip().split("\n")
@@ -142,9 +155,11 @@ class Window:
         self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
         for widget in self.memory_inner_frame.winfo_children():
             widget.destroy()
-        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
-        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor='nw')
+    
+        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
         self.edit_field = tk.Text(self.memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
+
+        self.memory_display_frame.update_idletasks()
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
@@ -185,25 +200,33 @@ class Window:
             memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
                                                   bg=self.primary_color, fg=self.off_color)
             memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
-        #highlight current address that cpu is pointing to
+        self.highlight_current_instruction()
 
 
     def start_simulation(self):
+        self.advanced_editor_button.config(state="disabled")
         self.simulation_running = True
         self.run_simulation_step()
 
     def run_simulation_step(self):
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
+            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
             self.execute_step()
             self.root.after(200, self.run_simulation_step)
 
     def halt_simulation(self):
+        self.advanced_editor_button.config(state="normal")
         self.simulation_running = False
         self.uvsim.cpu.halted = True
         self.update_main_control_frame()
+        self.uvsim.cpu.current = 0
+        self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 
+
     def execute_step(self):
+        self.advanced_editor_button.config(state="disabled")
+        self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
         self.update_main_control_frame()
 
@@ -328,7 +351,7 @@ class Window:
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        self.memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=220)
+        self.memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=240)
         self.memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
         memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=self.memory_canvas.yview)
