@@ -191,6 +191,7 @@ class Window:
                 memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
                 if self.uvsim.cpu.current == slot[0]:
                     memory_address_label.config(bg=self.off_color, fg=self.primary_color)
+                    self.memory_canvas.yview_moveto(slot[0] / len(contents))  # Focus on the current address label
                 memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
                                        bg=self.primary_color, fg=self.off_color)
                 memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
