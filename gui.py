@@ -1,7 +1,7 @@
 import json
 import tkinter as tk
 from tkinter import filedialog, colorchooser, messagebox
-from uvsim import UVSim
+from uvsim import UVSim, Opcode
 
 class Window:
     def __init__(self, root):
@@ -115,17 +115,22 @@ class Window:
         self.uvsim.store(file_path)
 
 
-    def submit_memory_edit(self):
-        pass
-
     def edit_memory(self):
-        #TODO: reset advanced editor button to be now the submit button
-        # self.main_control_frame.top_frame.program_control_panel.advanced_editor_button.pack_forget()
-        # submit_button = tk.Button(self.main_control_frame.top_frame.program_control_panel, text="Submit changes", command=self.submit_memory_edit,
-        #                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-        #                              highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        #submit_button.pack(pady=5)
+        def submit_memory_edit():
+            opcode_list = []
+            text_content = edit_field.get("1.0", tk.END).strip().split("\n")
+            try:
+                for line in text_content:
+                    print(line)
+                    line = Opcode(line)
+                    opcode_list.append(line)
+                print("opcodes were all valid")
+            except ValueError as e:
+                print(f"text passed invalid: {e}")
+
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+        self.advanced_editor_button.config(text="Submit Changes", command=submit_memory_edit)
+        
         print(f"length of content: {len(content)}")
         for widget in self.memory_display_frame.winfo_children():
             widget.destroy()
@@ -147,7 +152,6 @@ class Window:
             text_to_show += f"{thing[1]}\n"
         edit_field.insert(tk.END, text_to_show)
         edit_field.grid(row=0, column=1, padx=10, pady=4)
-        #TODO fix error when trying display text to memory display
 
     def update_main_control_frame(self):
         for widget in self.memory_inner_frame.winfo_children():
@@ -317,10 +321,10 @@ class Window:
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
 
-        advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
+        self.advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        advanced_editor_button.pack(pady=5)
+        self.advanced_editor_button.pack(pady=5)
 
         self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
         self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
