@@ -115,15 +115,16 @@ class Window:
         self.uvsim.store(file_path)
 
     def update_main_control_frame(self):
-        for widget in self.memory_display_frame.winfo_children():
-            widget.destroy()
+        if not self.uvsim.cpu.halted:
+            for widget in self.memory_display_frame.winfo_children():
+                widget.destroy()
 
-        memory_contents = self.uvsim.cpu.preview_state(self.uvsim.mem)
-        memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10),
+            memory_contents = self.uvsim.cpu.preview_state(self.uvsim.mem)
+            memory_label = tk.Label(self.memory_display_frame, text=memory_contents, justify=tk.LEFT, font=("Courier", 10),
                                 bg=self.primary_color, fg=self.off_color)
-        memory_label.pack(padx=10, pady=(10, 0))
+            memory_label.pack(padx=10, pady=(10, 0))
 
-        self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
+            self.current_instruction_label.config(text=f"[ {self.uvsim.cpu.current:04d} ]")
 
     def start_simulation(self):
         self.simulation_running = True
@@ -136,7 +137,7 @@ class Window:
 
     def halt_simulation(self):
         self.simulation_running = False
-        self.uvsim.cpu.halted = True
+        self.uvsim.cpu.halt()
         self.update_main_control_frame()
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 

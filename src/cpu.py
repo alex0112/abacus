@@ -261,9 +261,10 @@ class CPU:
         """
         Execute a single instruction.
         """
-        if self.current not in Memory.ADDRESSABLE_SPACE:
-            self.halted = True
-        else:
-            current_opcode = memory.read(self.current)
-            self.process(current_opcode, memory, io_device)
-            self.current += 1
+        if not self.halted:
+            if self.current not in Memory.ADDRESSABLE_SPACE:
+                self.halted = True
+            else:
+                current_opcode = memory.read(self.current)
+                self.process(current_opcode, memory, io_device)
+                self.current += 1

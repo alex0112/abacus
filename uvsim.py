@@ -70,14 +70,5 @@ class UVSim:
             for i, opcode in enumerate(self.mem):
                 if i <= last_non_empty_index:
                     program.write(str(opcode) + "\n")
-
-
             
             print('Program saved successfully')
-            
-
-            
-
-        
-
-
