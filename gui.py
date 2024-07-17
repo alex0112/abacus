@@ -212,7 +212,6 @@ class Window:
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
             self.execute_step()
             self.root.after(200, self.run_simulation_step)
-            self.simulation_running = not self.uvsim.cpu.halted
 
     def halt_simulation(self):
         self.advanced_editor_button.config(state="normal")
@@ -225,7 +224,6 @@ class Window:
 
 
     def execute_step(self):
-         #this is causing the program to refresh memory every step which makes it take longer to load
         self.advanced_editor_button.config(state="disabled")
         self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
