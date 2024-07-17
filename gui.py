@@ -105,13 +105,9 @@ class Window:
             self.uvsim.load(file_path)
             self.file_selection_frame.pack_forget()
             self.main_control_frame.pack(padx=20, pady=20)
-            for widget in self.memory_inner_frame.winfo_children():
-                widget.destroy()
-            self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
-            self.update_main_control_frame()
-            self.root.update_idletasks()  # Force the window to update its size
             self.uvsim.cpu.current = 0
             self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+            self.update_main_control_frame()
     
     def store_file(self):
         '''Store the contents of memory to a file using the file dialog.'''
@@ -121,6 +117,7 @@ class Window:
 
 
     def submit_memory_edit(self):
+        '''Submit the memory edit to the memory.'''
         opcode_list = []
         text_content = self.edit_field.get("1.0", tk.END).strip().split("\n")
         try:
@@ -140,6 +137,7 @@ class Window:
 
 
     def edit_memory(self):
+        '''Open the advanced editor for memory editing.'''
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
         self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
         for widget in self.memory_inner_frame.winfo_children():
@@ -161,6 +159,7 @@ class Window:
 
 
     def modify_memory(self, slot, entry):
+            '''Modify the memory slot with the given entry.'''
             try:
                 entry = int(entry)
                 self.uvsim.mem.write(slot[0], entry)
@@ -170,7 +169,7 @@ class Window:
                 messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
                 self.update_main_control_frame()
 
-    def on_click(self, slot, label):
+    def on_click_opcode(self, slot, label):
         label.forget()
         entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
         entry.insert(0, slot[1])
@@ -178,29 +177,31 @@ class Window:
         entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
     def update_main_control_frame(self):
-        if not self.uvsim.cpu.halted:
+        contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
+        def update_memory():
             for widget in self.memory_inner_frame.winfo_children():
                 widget.destroy()
             self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
-            contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
             self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
+            #adjust scrollbar system to new size of memory
+            self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
             for slot in contents:
                 memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
-                                         bg=self.primary_color, fg=self.off_color)
+                                            bg=self.primary_color, fg=self.off_color)
                 memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
                 if self.uvsim.cpu.current == slot[0]:
                     memory_address_label.config(bg=self.off_color, fg=self.primary_color)
                     self.memory_canvas.yview_moveto(slot[0] / len(contents))  # Focus on the current address label
                 memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
-                                       bg=self.primary_color, fg=self.off_color)
+                                        bg=self.primary_color, fg=self.off_color)
                 memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
-                memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
+                memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click_opcode(slot, label))
                 memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
-                                               bg=self.primary_color, fg=self.off_color)
+                                                bg=self.primary_color, fg=self.off_color)
                 memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
-     
                 self.memory_inner_frame.update_idletasks()
                 self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+        update_memory()
 
     def start_simulation(self):
         self.advanced_editor_button.config(state="disabled")
@@ -211,22 +212,28 @@ class Window:
         if self.simulation_running and not self.uvsim.cpu.waiting_for_input:
             self.execute_step()
             self.root.after(200, self.run_simulation_step)
+            self.simulation_running = not self.uvsim.cpu.halted
 
     def halt_simulation(self):
         self.advanced_editor_button.config(state="normal")
         self.simulation_running = False
         self.uvsim.cpu.halted = True
-        self.update_main_control_frame()
         self.uvsim.cpu.current = 0
         self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+        self.update_main_control_frame()
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 
 
     def execute_step(self):
-        self.update_main_control_frame() #this is causing the program to refresh memory every step which makes it take longer to load
+         #this is causing the program to refresh memory every step which makes it take longer to load
         self.advanced_editor_button.config(state="disabled")
         self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
+        if not self.uvsim.cpu.halted:
+            self.update_main_control_frame()
+        else:    
+            self.advanced_editor_button.config(state="normal")
+
         
 
     def tk_reader(self):

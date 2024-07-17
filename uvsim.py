@@ -33,6 +33,7 @@ class UVSim:
         """
         Given a filename load its contents into memory starting at location `00`
         """
+        self.mem.clear()
         with open(filename) as program:
             #if len(program) > 100: ## TODO: write a check here for memory bounds
             #    pass ## TODO: We need to define behavior for when a program exceeds the available memory

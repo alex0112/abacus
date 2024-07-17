@@ -148,3 +148,19 @@ class Memory:
             preview[address] = self[address]
 
         return preview
+
+    def clear(self, new_mem=[]):
+        """
+        Clears the memory, optional parameter takes a list of Opcodes to store.
+        """
+        if len(new_mem) == 0:
+            self.__mem = dict()
+        elif len(new_mem) not in Memory.ADDRESSABLE_SPACE:
+            raise IndexError(f"Attempted to clear memory with an array of length {len(new_mem)}. Cannot clear memory with an array whose length exceeds {Memory.ADDRESSABLE_SPACE.stop}")
+        else:
+            mem = dict()
+            for i in range(len(new_mem)):
+                if not isinstance(new_mem[i], Opcode):
+                    raise TypeError(f"Attempted to clear memory with a non-Opcode object at index {i}")
+                mem[i] = new_mem[i]
+            self.__mem = mem
