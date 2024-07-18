@@ -404,6 +404,12 @@ class Window:
                                     bg=self.primary_color, fg=self.off_color)
         self.prompt_label.pack(side=tk.LEFT, padx=10, pady=(10, 0))
 
+         # Add Color Selection button at the bottom
+        color_selection_button = tk.Button(self.main_control_frame, text="Color Selection", command=self.show_color_selection,
+                                           bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        color_selection_button.pack(pady=20)
+
     def change_colors(self):
         primary_color = colorchooser.askcolor(title="Choose Primary Color")[1]
         off_color = colorchooser.askcolor(title="Choose Off Color")[1]
