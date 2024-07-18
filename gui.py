@@ -183,7 +183,6 @@ class Window:
                 widget.destroy()
             self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
             self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
-            #adjust scrollbar system to new size of memory
             self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
             for slot in contents:
                 memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
