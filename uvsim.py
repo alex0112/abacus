@@ -83,6 +83,7 @@ class UVSim:
         """
         op_list = [10, 11, 20, 21, 30, 31, 32, 33, 40, 41, 42, 43]
         new_list = []
+        current = ""
         with open(filename, 'r') as file:
             #separate each line to be analized
             for line in file:
@@ -93,9 +94,11 @@ class UVSim:
                 else:
                     current = f"{line[0]}00{current}" #add 00 to the address if is just valie
                 new_list.append(current)
-            #print in readable format
-            for i in new_list:
-                print(i)
+        #save in file
+        with open(filename, 'w') as file:
+            for line in new_list:
+                file.write(line)
+            print('Program converted successfully')
                     
 
         
