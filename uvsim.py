@@ -77,8 +77,26 @@ class UVSim:
             
             print('Program saved successfully')
             
-
-            
+    def convert(self, filename):
+        """
+        Convert the contents of memory to a binary file
+        """
+        op_list = [10, 11, 20, 21, 30, 31, 32, 33, 40, 41, 42, 43]
+        new_list = []
+        with open(filename, 'r') as file:
+            #separate each line to be analized
+            for line in file:
+                if line[0] == "+" or line[0] == "-":
+                    current = line[1:]
+                if int(current[:2]) in op_list:
+                    current = f"{line[0]}0{current[0:2]}0{current[2:]}" #add a 0 to the opcode and 0 to the address
+                else:
+                    current = f"{line[0]}00{current}" #add 00 to the address if is just valie
+                new_list.append(current)
+            #print in readable format
+            for i in new_list:
+                print(i)
+                    
 
         
 
