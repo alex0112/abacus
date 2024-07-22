@@ -203,6 +203,9 @@ class Window:
                 self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
 
     def start_simulation(self):
+        if not hasattr(self, 'edit_field'):
+            self.edit_memory()  # Ensure edit_field is created
+        self.submit_memory_edit()
         self.advanced_editor_button.config(state="disabled")
         self.simulation_running = True
         self.run_simulation_step()
