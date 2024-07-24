@@ -9,6 +9,7 @@ class Window:
         self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
         self.simulation_running = False
+        self.output_log = []
 
         self.default_primary_color = "#275D38"
         self.default_off_color = "#FFFFFF"
@@ -203,6 +204,9 @@ class Window:
                 self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
 
     def start_simulation(self):
+        if not hasattr(self, 'edit_field'):
+            self.edit_memory()  # Ensure edit_field is created
+        self.submit_memory_edit()
         self.advanced_editor_button.config(state="disabled")
         self.simulation_running = True
         self.run_simulation_step()
@@ -243,10 +247,13 @@ class Window:
         self.input_var.set(user_input)
 
     def tk_writer(self, text):
-        self.output_label.config(text=text)
+        self.output_log.append(str(text))  # Append the new output to the log
+        self.output_label.config(text="\n".join(self.output_log))  # Update the output display with the entire log
+
 
     def tk_out_line(self, text):
-        self.current_instruction_label.config(text=text)
+        self.output_log.append(str(text)) # Append the new output to the log
+        self.current_instruction_label.config(text="\n".join(self.output_log))  # Update the output display with the entire log
 
     def title_screen_frame(self):
         self.title_frame = tk.Frame(self.root, bg=self.primary_color)
