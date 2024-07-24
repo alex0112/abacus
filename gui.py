@@ -10,6 +10,7 @@ class Window:
         self.root = root
         self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
+        self.output_log = []
 
         self.default_primary_color = "#275D38"
         self.default_off_color = "#FFFFFF"
@@ -281,6 +282,9 @@ class Window:
                 memory_canvas.config(scrollregion=memory_canvas.bbox("all"))
 
     def start_simulation(self):
+        if not hasattr(self, 'edit_field'):
+            self.edit_memory()  # Ensure edit_field is created
+        self.submit_memory_edit()
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
         self.simulation_running = True
         self.run_simulation_step()
@@ -323,10 +327,13 @@ class Window:
         self.input_var.set(user_input)
 
     def tk_writer(self, text):
-        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("output_panel").nametowidget("output_label").config(text=text)
+        self.output_log.append(str(text))  # Append the new output to the log
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("output_panel").nametowidget("output_label").config(text="\n".join(self.output_log)) # Update the output display with the entire log
+
 
     def tk_out_line(self, text):
-        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("control_panel").nametowidget("current_instruction_label").config(text=text)
+        self.output_log.append(str(text)) # Append the new output to the log
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("control_panel").nametowidget("current_instruction_label").config(text="\n".join(self.output_log))  # Update the output display with the entire log
 
     def title_screen_frame(self, tab, event=None):
         title_frame = tk.Frame(tab, bg=self.primary_color, name="title_frame")
