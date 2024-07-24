@@ -191,7 +191,7 @@ class Window:
 
     def submit_memory_edit(self):
         opcode_list = []
-        text_content = self.edit_field.get("1.0", tk.END).strip().split("\n")
+        text_content = self.tab_control.nametowidget(self.current_tab).edit_field.get("1.0", tk.END).strip().split("\n")
         try:
             for line in text_content:
                 line = Opcode(line)
@@ -214,8 +214,8 @@ class Window:
         for widget in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").winfo_children():
             widget.destroy()
             
-        self.edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
-        self.edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
+        self.tab_control.nametowidget(self.current_tab).edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
+        self.tab_control.nametowidget(self.current_tab).edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
         
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").grid_columnconfigure(0, weight=1)
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").grid_rowconfigure(0, weight=1)
@@ -223,7 +223,7 @@ class Window:
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
-        self.edit_field.insert(tk.END, text_to_show)
+        self.tab_control.nametowidget(self.current_tab).edit_field.insert(tk.END, text_to_show)
         
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").update_idletasks()
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").config(scrollregion=self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").bbox("all"))
@@ -282,7 +282,7 @@ class Window:
                 memory_canvas.config(scrollregion=memory_canvas.bbox("all"))
 
     def start_simulation(self):
-        if not hasattr(self, 'edit_field'):
+        if not hasattr(self.tab_control.nametowidget(self.current_tab), 'edit_field'):
             self.edit_memory()  # Ensure edit_field is created
         self.submit_memory_edit()
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
