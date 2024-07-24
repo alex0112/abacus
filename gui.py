@@ -1,26 +1,90 @@
 import json
 import tkinter as tk
-from tkinter import filedialog, colorchooser, messagebox
+from tkinter import filedialog, colorchooser, messagebox, ttk
 from uvsim import UVSim, Opcode
 
 class Window:
     def __init__(self, root):
+        self.simulation_running = False
+        self.uvsim_instances = {}
         self.root = root
         self.input_var = tk.StringVar()
         self.root.title("UVSim - BasicML Simulator")
-        self.simulation_running = False
         self.output_log = []
 
         self.default_primary_color = "#275D38"
         self.default_off_color = "#FFFFFF"
-
-        self.load_config()
+        self.style = ttk.Style()
+    
+        self.style.configure('Custom.TFrame',
+                    background=self.default_primary_color,
+                    foreground=self.default_off_color,
+                    padding=[10, 5])
         
-        self.title_screen_frame()
-        self.select_screen_frame()
-        self.main_screen_frame()
+        self.load_config()
 
-        self.uvsim = UVSim(reader=self.tk_reader, writer=self.tk_writer, out_line=self.tk_out_line)
+        self.tab_control = ttk.Notebook(root)
+
+        self.tab_setup()
+        self.tab_control.bind("<<NotebookTabChanged>>", self.on_tab_change)
+
+    def on_tab_change(self, event):
+        if self.simulation_running:
+            # Revert to the previous tab
+            self.tab_control.select(self.current_tab)
+            messagebox.showwarning("Simulation Running", "You cannot switch tabs while simulation is running.")
+        else:
+            self.current_tab = self.tab_control.select()
+            self.uvsim = self.uvsim_instances[self.tab_control.index("current")]
+
+    
+    def tab_setup(self):
+        if not self.simulation_running:
+            tab_index = len(self.uvsim_instances)
+            new_uvsim = UVSim(reader=self.tk_reader, writer=self.tk_writer, out_line=self.tk_out_line)
+            self.uvsim_instances[tab_index] = new_uvsim
+
+            newTab = ttk.Frame(self.tab_control)
+            newTab.configure(style='Custom.TFrame')
+
+            self.tab_control.add(newTab, text='New Tab')
+            self.tab_control.pack(expand=1, fill="both")
+            
+            self.title_screen_frame(newTab)
+            self.main_screen_frame(newTab)
+
+            self.tab_control.select(newTab)
+            self.current_tab = self.tab_control.select()
+        else:
+            messagebox.showwarning("Simulation Running", "You cannot create tabs while simulation is running.")
+    
+    def close_tab(self):
+        if not self.simulation_running:
+            current_tab_index = self.tab_control.index("current")
+            
+            if len(self.uvsim_instances) <= 1:
+                self.root.quit()
+                return
+
+            if current_tab_index == 0:
+                self.tab_control.select(1)
+            else:
+                self.tab_control.select(0)
+            
+            self.uvsim_instances.pop(current_tab_index)
+
+            self.tab_control.forget(current_tab_index)
+
+            updated_uvsim_instances = {}
+            for new_index, old_index in enumerate(sorted(self.uvsim_instances.keys())):
+                updated_uvsim_instances[new_index] = self.uvsim_instances[old_index]
+
+            self.uvsim_instances = updated_uvsim_instances
+
+            self.current_tab = self.tab_control.select()
+        else:
+            messagebox.showwarning("Simulation Running", "You cannot create tabs while simulation is running.")
+
 
     def load_config(self):
         try:
@@ -44,6 +108,9 @@ class Window:
     
     def update_colors(self):
         self.root.configure(bg=self.primary_color)
+    
+        self.style.configure('Custom.TFrame',
+                    background=self.primary_color,)
     
     def show_help(self):
         help_window = tk.Toplevel(self.root)
@@ -90,29 +157,30 @@ class Window:
         close_button.pack(pady=10)
 
     def start_program(self):
-        self.title_frame.pack_forget()
-        self.file_selection_frame.pack(padx=20, pady=20)
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").pack_forget()
+        self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").pack()
         self.root.update_idletasks()  # Force the window to update its size
 
     def browse_files(self):
         file_path = filedialog.askopenfilename(initialdir="./bml_examples", title="Select a File",
                                                filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
-        self.file_entry.delete(0, tk.END)
-        self.file_entry.insert(0, file_path)
+        self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").nametowidget("file_entry").delete(0, tk.END)
+        self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").nametowidget("file_entry").insert(0, file_path)
 
     def load_file(self):
-        file_path = self.file_entry.get()
+        file_path = self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").nametowidget("file_entry").get()
         if file_path:
             self.uvsim.load(file_path)
-            self.file_selection_frame.pack_forget()
-            self.main_control_frame.pack(padx=20, pady=20)
-            for widget in self.memory_inner_frame.winfo_children():
+            self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").pack_forget()
+            self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").pack(padx=20, pady=20)
+            self.tab_control.tab(self.tab_control.index(self.tab_control.select()), text=file_path.split('/')[-1])
+            for widget in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").winfo_children():
                 widget.destroy()
-            self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+            self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").create_window((0, 0), window=self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"))
             self.update_main_control_frame()
             self.root.update_idletasks()  # Force the window to update its size
             self.uvsim.cpu.current = 0
-            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+            self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
     
     def store_file(self):
         '''Store the contents of memory to a file using the file dialog.'''
@@ -134,7 +202,7 @@ class Window:
                 self.uvsim.mem.write(address, opcode_list[address])
             print("memory updated succesfully")
             self.update_main_control_frame()
-            self.advanced_editor_button.config(text="Advanced Edit", command=self.edit_memory)
+            self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(text="Advanced Edit", command=self.edit_memory)
         except ValueError as e:
             print(f"text passed invalid: {e}")
             messagebox.showerror("Error", f"The submited code is invalid.\n{e}")
@@ -142,23 +210,23 @@ class Window:
 
     def edit_memory(self):
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-        self.advanced_editor_button.config(text="Submit Changes", command=self.submit_memory_edit)
-        for widget in self.memory_inner_frame.winfo_children():
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(text="Submit Changes", command=self.submit_memory_edit)
+        for widget in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").winfo_children():
             widget.destroy()
             
-        self.edit_field = tk.Text(self.memory_inner_frame, font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
+        self.edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
         self.edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
         
-        self.memory_inner_frame.grid_columnconfigure(0, weight=1)
-        self.memory_inner_frame.grid_rowconfigure(0, weight=1)
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").grid_columnconfigure(0, weight=1)
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").grid_rowconfigure(0, weight=1)
         
         text_to_show = ""
         for thing in content:
             text_to_show += f"{thing[1]}\n"
         self.edit_field.insert(tk.END, text_to_show)
         
-        self.memory_inner_frame.update_idletasks()
-        self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").update_idletasks()
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").config(scrollregion=self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").bbox("all"))
 
 
     def modify_memory(self, slot, entry):
@@ -173,41 +241,51 @@ class Window:
 
     def on_click(self, slot, label):
         label.forget()
-        entry = tk.Entry(self.memory_inner_frame, font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
+        entry = tk.Entry(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
         entry.insert(0, slot[1])
         entry.bind("<Return>", lambda event: self.modify_memory(slot, entry.get()))
         entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
     def update_main_control_frame(self):
+        
+        # for child in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").winfo_children():
+        #     print(child.winfo_name())
+
+        main_control_frame = self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame")
+        top_frame = main_control_frame.nametowidget("top_frame")
+        memory_canvas = top_frame.nametowidget("memory_display_frame").nametowidget("memory_canvas")
+        memory_inner_frame = memory_canvas.nametowidget("memory_inner_frame")
+        current_instruction_display = main_control_frame.nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display")
+
         if not self.uvsim.cpu.halted:
-            for widget in self.memory_inner_frame.winfo_children():
+            for widget in memory_inner_frame.winfo_children():
                 widget.destroy()
-            self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+            current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
             contents = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
-            self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame, anchor="nw")
+            memory_canvas.create_window((0, 0), window=memory_inner_frame, anchor="nw")
             for slot in contents:
-                memory_address_label = tk.Label(self.memory_inner_frame, text=slot[0], font=("Courier", 10),
+                memory_address_label = tk.Label(memory_inner_frame, text=slot[0], font=("Courier", 10),
                                          bg=self.primary_color, fg=self.off_color)
                 memory_address_label.grid(row=slot[0], column=0, padx=10, pady=5)
                 if self.uvsim.cpu.current == slot[0]:
                     memory_address_label.config(bg=self.off_color, fg=self.primary_color)
-                    self.memory_canvas.yview_moveto(slot[0] / len(contents))  # Focus on the current address label
-                memory_value_label = tk.Label(self.memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
+                    memory_canvas.yview_moveto(slot[0] / len(contents))  # Focus on the current address label
+                memory_value_label = tk.Label(memory_inner_frame, text=slot[1], font=("Courier", 10), cursor="xterm",
                                        bg=self.primary_color, fg=self.off_color)
                 memory_value_label.grid(row=slot[0], column=1, padx=10, pady=5)
                 memory_value_label.bind("<Button-1>", lambda event, slot=slot, label=memory_value_label: self.on_click(slot, label))
-                memory_value_friendly_label = tk.Label(self.memory_inner_frame, text=slot[2], font=("Courier", 10),
+                memory_value_friendly_label = tk.Label(memory_inner_frame, text=slot[2], font=("Courier", 10),
                                                bg=self.primary_color, fg=self.off_color)
                 memory_value_friendly_label.grid(row=slot[0], column=2, padx=10, pady=5)
      
-                self.memory_inner_frame.update_idletasks()
-                self.memory_canvas.config(scrollregion=self.memory_canvas.bbox("all"))
+                memory_inner_frame.update_idletasks()
+                memory_canvas.config(scrollregion=memory_canvas.bbox("all"))
 
     def start_simulation(self):
         if not hasattr(self, 'edit_field'):
             self.edit_memory()  # Ensure edit_field is created
         self.submit_memory_edit()
-        self.advanced_editor_button.config(state="disabled")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
         self.simulation_running = True
         self.run_simulation_step()
 
@@ -217,106 +295,101 @@ class Window:
             self.root.after(200, self.run_simulation_step)
 
     def halt_simulation(self):
-        self.advanced_editor_button.config(state="normal")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="normal")
         self.simulation_running = False
         self.uvsim.cpu.halted = True
         self.update_main_control_frame()
         self.uvsim.cpu.current = 0
-        self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 
 
     def execute_step(self):
         self.update_main_control_frame() #this is causing the program to refresh memory every step which makes it take longer to load
-        self.advanced_editor_button.config(state="disabled")
-        self.current_instruction_display.config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
+        if self.uvsim.cpu.halted:
+            self.simulation_running = False
         
 
     def tk_reader(self):
-        self.prompt_label.config(text="Please input a four digit command or a four digit value.")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("prompt_label").pack(side=tk.BOTTOM, padx=10, pady=(10, 0))
         self.input_var.set("")
-        self.user_input_entry.focus()
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("user_input_label").nametowidget("user_input").focus()
         self.root.wait_variable(self.input_var)
-        self.prompt_label.config(text="")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("prompt_label").pack_forget()
         return self.input_var.get()
 
     def submit_input(self, event=None):
-        user_input = self.user_input_entry.get()
-        self.user_input_entry.delete(0, tk.END)
+        user_input = self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("user_input_label").nametowidget("user_input").get()
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("user_input_label").nametowidget("user_input").delete(0, tk.END)
         self.input_var.set(user_input)
 
     def tk_writer(self, text):
         self.output_log.append(str(text))  # Append the new output to the log
-        self.output_label.config(text="\n".join(self.output_log))  # Update the output display with the entire log
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("output_panel").nametowidget("output_label").config(text="\n".join(self.output_log)) # Update the output display with the entire log
 
 
     def tk_out_line(self, text):
         self.output_log.append(str(text)) # Append the new output to the log
-        self.current_instruction_label.config(text="\n".join(self.output_log))  # Update the output display with the entire log
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("control_panel").nametowidget("current_instruction_label").config(text="\n".join(self.output_log))  # Update the output display with the entire log
 
-    def title_screen_frame(self):
-        self.title_frame = tk.Frame(self.root, bg=self.primary_color)
-        self.title_frame.pack()
+    def title_screen_frame(self, tab, event=None):
+        title_frame = tk.Frame(tab, bg=self.primary_color, name="title_frame")
+        title_frame.pack()
 
-        title_label = tk.Label(self.title_frame, text="Welcome to UVSim", font=("Helvetica", 24),
+        title_label = tk.Label(title_frame, text="Welcome to UVSim", font=("Helvetica", 24),
                                bg=self.primary_color, fg=self.off_color)
         title_label.pack(pady=20)
 
-        buttons_frame = tk.Frame(self.title_frame, bg=self.primary_color)
-        buttons_frame.pack()
+        file_entry = tk.Entry(title_frame, name="file_entry")
+        file_entry.pack(pady=10)
 
-        start_button = tk.Button(buttons_frame, text="START", command=self.start_program,
-                                 bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-                                 highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        start_button.pack(side=tk.LEFT, padx=20, pady=20)
-
-        help_button = tk.Button(buttons_frame, text="HELP", command=self.show_help,
-                                bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-                                highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        help_button.pack(side=tk.RIGHT, padx=20, pady=20)
-
-        color_selection_button = tk.Button(self.title_frame, text="Color Selection", command=self.show_color_selection,
-                                           bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        color_selection_button.pack(pady=20)
-
-    def select_screen_frame(self):
-        self.file_selection_frame = tk.Frame(self.root, bg=self.primary_color)
-
-        file_selection_label = tk.Label(self.file_selection_frame, text="Select a Test File", font=("Helvetica", 24),
-                                        bg=self.primary_color, fg=self.off_color)
-        file_selection_label.pack(pady=20)
-
-        self.file_entry = tk.Entry(self.file_selection_frame)
-        self.file_entry.pack(pady=10)
-
-        browse_button = tk.Button(self.file_selection_frame, text="Browse Files", command=self.browse_files,
+        browse_button = tk.Button(title_frame, text="Browse Files", command=self.browse_files,
                                   bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                   highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         browse_button.pack(pady=10)
 
-        load_file_button = tk.Button(self.file_selection_frame, text="LOAD FILE", command=self.load_file,
+        load_file_button = tk.Button(title_frame, text="LOAD FILE", command=self.load_file,
                                      bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                      highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         load_file_button.pack(pady=10)
 
-    def main_screen_frame(self):
-        self.main_control_frame = tk.Frame(self.root, bg=self.primary_color)
+        buttons_frame = tk.Frame(title_frame, bg=self.primary_color)
+        buttons_frame.pack()
+
+        help_button = tk.Button(buttons_frame, text="HELP", command=self.show_help,
+                                bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        help_button.pack(side=tk.LEFT, padx=10, pady=20)
+
+        close_button = tk.Button(buttons_frame, text="Close Tab", command=self.close_tab,
+                                bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        close_button.pack(side=tk.LEFT, padx=10, pady=20)
+
+        color_selection_button = tk.Button(buttons_frame, text="Color Selection", command=self.show_color_selection,
+                                           bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        color_selection_button.pack(side=tk.RIGHT, padx=10, pady=20)
+
+    def main_screen_frame(self, tab):
+        main_control_frame = tk.Frame(tab, bg=self.primary_color, name="main_control_frame")
 
         # Add the header here
-        title_label = tk.Label(self.main_control_frame, text="UVSim - Control Panel", font=("Helvetica", 24),
+        title_label = tk.Label(main_control_frame, text="UVSim - Control Panel", font=("Helvetica", 24),
                                bg=self.primary_color, fg=self.off_color)
         title_label.pack(pady=10)
 
-        top_frame = tk.Frame(self.main_control_frame, bg=self.primary_color)
+        top_frame = tk.Frame(main_control_frame, bg=self.primary_color, name="top_frame")
         top_frame.pack(side=tk.TOP, fill=tk.X)
 
-        bottom_frame = tk.Frame(self.main_control_frame, bg=self.primary_color)
+        bottom_frame = tk.Frame(main_control_frame, bg=self.primary_color, name="bottom_frame")
         bottom_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Top row of panels
-        program_control_panel = tk.LabelFrame(top_frame, text="Program Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), padx=10, labelanchor='n')
+        program_control_panel = tk.LabelFrame(top_frame, text="Program Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), padx=10, labelanchor='n', name="program_control_panel")
         program_control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
         start_simulation_button = tk.Button(program_control_panel, text="Start Simulation", command=self.start_simulation,
@@ -349,73 +422,85 @@ class Window:
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
 
-        self.advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
+        advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat", name="advanced_editor_button")
+        advanced_editor_button.pack(pady=5)
+
+        new_file_button = tk.Button(program_control_panel, text="New File Tab", command=self.tab_setup,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
-        self.advanced_editor_button.pack(pady=5)
+        new_file_button.pack(pady=5)
 
-        self.memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
-        self.memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
+        memory_display_frame = tk.LabelFrame(top_frame, text="Memory Display", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n', name="memory_display_frame")
+        memory_display_frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        self.memory_canvas = tk.Canvas(self.memory_display_frame, bg=self.primary_color, highlightthickness=0, width=240)
-        self.memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
+        memory_canvas = tk.Canvas(memory_display_frame, bg=self.primary_color, highlightthickness=0, width=240, name="memory_canvas")
+        memory_canvas.pack(side=tk.LEFT, fill=tk.BOTH)
 
-        memory_scrollbar = tk.Scrollbar(self.memory_display_frame, orient="vertical", command=self.memory_canvas.yview)
+        memory_scrollbar = tk.Scrollbar(memory_display_frame, orient="vertical", command=memory_canvas.yview)
         memory_scrollbar.pack(side=tk.RIGHT, fill='y')
         
-        self.memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
-        self.memory_canvas.bind('<Configure>', lambda e: self.memory_canvas.configure(scrollregion=self.memory_canvas.bbox("all")))
+        memory_canvas.configure(yscrollcommand=memory_scrollbar.set)
+        memory_canvas.bind('<Configure>', lambda e: memory_canvas.configure(scrollregion=memory_canvas.bbox("all")))
 
-        self.memory_inner_frame = tk.Frame(self.memory_canvas, bg=self.primary_color)
-        self.memory_canvas.create_window((0, 0), window=self.memory_inner_frame)
+        memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color, name="memory_inner_frame")
+        memory_canvas.create_window((0, 0), window=memory_inner_frame)
 
-        control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n', name="control_panel")
         control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
-        self.current_instruction_label = tk.Label(control_panel, text="[ +0000 ]", font=("Courier", 14),
-                                                  bg=self.primary_color, fg=self.off_color)
-        self.current_instruction_label.pack(padx=10, pady=(10, 0))
+        current_instruction_label = tk.Label(control_panel, text="[ +0000 ]", font=("Courier", 14),
+                                                  bg=self.primary_color, fg=self.off_color, name="current_instruction_label")
+        current_instruction_label.pack(padx=10, pady=(10, 0))
 
         # Bottom row of panels
-        current_instruction_panel = tk.LabelFrame(bottom_frame, text="Current Instruction", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        current_instruction_panel = tk.LabelFrame(bottom_frame, text="Current Instruction", bg=self.primary_color, fg=self.off_color, 
+                                                  font=("Helvetica", 12), labelanchor='n', name="current_instruction_panel")
         current_instruction_panel.pack(fill=tk.BOTH, padx=10, pady=10)
 
-        self.current_instruction_display = tk.Label(current_instruction_panel, text="[ 0000 ]", font=("Courier", 12),
-                                                    bg=self.primary_color, fg=self.off_color)
-        self.current_instruction_display.pack(padx=10, pady=(10, 0))
+        current_instruction_display = tk.Label(current_instruction_panel, text="[ 0000 ]", font=("Courier", 12),
+                                                    bg=self.primary_color, fg=self.off_color, name="current_instruction_display")
+        current_instruction_display.pack(padx=10, pady=(10, 0))
 
-        output_panel = tk.LabelFrame(bottom_frame, text="Output Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        output_panel = tk.LabelFrame(bottom_frame, text="Output Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n', name="output_panel")
         output_panel.pack(fill=tk.BOTH, padx=10, pady=10)
 
-        self.output_label = tk.Label(output_panel, text="N/A", font=("Courier", 12),
-                                     bg=self.primary_color, fg=self.off_color)
-        self.output_label.pack(padx=10, pady=(10, 0))
+        output_label = tk.Label(output_panel, text="N/A", font=("Courier", 12),
+                                     bg=self.primary_color, fg=self.off_color, name="output_label")
+        output_label.pack(padx=10, pady=(10, 0))
 
-        user_input_panel = tk.LabelFrame(bottom_frame, text="User Input Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n')
+        user_input_panel = tk.LabelFrame(bottom_frame, text="User Input Panel", bg=self.primary_color, fg=self.off_color, 
+                                         font=("Helvetica", 12), labelanchor='n', name="user_input_label")
         user_input_panel.pack(fill=tk.BOTH, padx=10, pady=10)
 
         user_input_label = tk.Label(user_input_panel, text="Input: ", font=("Courier", 12),
                                     bg=self.primary_color, fg=self.off_color)
         user_input_label.pack(side=tk.LEFT, padx=10, pady=(10, 0))
 
-        self.user_input_entry = tk.Entry(user_input_panel)
-        self.user_input_entry.pack(side=tk.LEFT, padx=10, pady=(10, 0))
-        self.user_input_entry.bind("<Return>", self.submit_input)
+        user_input_entry = tk.Entry(user_input_panel, name="user_input")
+        user_input_entry.pack(side=tk.LEFT, padx=10, pady=(10, 0))
+        user_input_entry.bind("<Return>", self.submit_input)
 
         input_button = tk.Button(user_input_panel, text="Input", command=self.submit_input,
                                  bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-                                 highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+                                 highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat", name="input_button")
         input_button.pack(padx=10, pady=(10, 0))
 
-        self.prompt_label = tk.Label(user_input_panel, text="Input: ", font=("Courier", 12),
-                                    bg=self.primary_color, fg=self.off_color)
-        self.prompt_label.pack(side=tk.LEFT, padx=10, pady=(10, 0))
+        prompt_label = tk.Label(main_control_frame, text="Please input a four digit command or a four digit value.", font=("Courier", 12),
+                                    bg=self.primary_color, fg=self.off_color, name="prompt_label")
+        prompt_label.pack_forget()
 
          # Add Color Selection button at the bottom
-        color_selection_button = tk.Button(self.main_control_frame, text="Color Selection", command=self.show_color_selection,
+        color_selection_button = tk.Button(main_control_frame, text="Color Selection", command=self.show_color_selection,
                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         color_selection_button.pack(pady=20)
+
+        close_button = tk.Button(main_control_frame, text="Close Tab", command=self.close_tab,
+                                bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        close_button.pack(pady=10)
 
     def change_colors(self):
         primary_color = colorchooser.askcolor(title="Choose Primary Color")[1]
