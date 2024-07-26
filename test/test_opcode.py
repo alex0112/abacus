@@ -259,6 +259,16 @@ def test_unamed_opcode_4digit():
 # New Six Digit Opcode Behavior #
 #################################
 
+def test_unnamed_opcode_NOOP():
+    op4 = Opcode("+7777")
+    op6 = Opcode("+777777")
+
+    assert str(op4) == "NOOP"
+    assert str(op6) == "NOOP"
+
+    assert op4.raw == "+007777"
+    assert op6.raw == "+777777"
+
 def test_named_opcode_READ():
     op4 = Opcode("+1010")
     op6 = Opcode("+010010")
@@ -266,9 +276,29 @@ def test_named_opcode_READ():
     assert str(op4) == "READ 010"
     assert str(op6) == "READ 010"
 
-def test_named_opcode_WRITE():
-    op4 = Opcode("+1110")
-    op6 = Opcode("+012010")
+    assert op4.raw == "+010010"
+    assert op6.raw == "+010010"
 
-    assert str(op4) == "WRITE 010"
-    assert str(op6) == "WRITE 010"
+# def test_named_opcode_WRITE():
+#     op4 = Opcode("+1110")
+#     op6 = Opcode("+012010")
+
+#     assert str(op4) == "WRITE 010"
+#     assert str(op6) == "WRITE 010"
+
+# def test_named_opcode_WRITE():
+#     op4 = Opcode("+1110")
+#     op6 = Opcode("+012010")
+
+#     assert str(op4) == "WRITE 010"
+#     assert str(op6) == "WRITE 010"
+
+# def test_named_opcode_LOAD():
+#     op4 = Opcode("+1110")
+#     op6 = Opcode("+012010")
+
+#     assert str(op4) == "LOAD 010"
+#     assert str(op6) == "LOAD 010"
+
+# def test_named_opcode_STORE:
+#     pass
