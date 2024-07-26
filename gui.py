@@ -189,6 +189,13 @@ class Window:
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
+    def convert_file(self):
+        #open window to select file
+        file_path = filedialog.askopenfilename(initialdir="./bml_examples", title="Select a File to Convert",
+                                                  filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
+        if file_path:
+            self.uvsim.convert(file_path)
+
 
     def submit_memory_edit(self):
         '''Submit the memory edit to the memory.'''
@@ -425,6 +432,11 @@ class Window:
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
+
+        convert_test_file_button = tk.Button(program_control_panel, text="Convert Test File", command=self.convert_file,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        convert_test_file_button.pack(pady=5)
 
         advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
