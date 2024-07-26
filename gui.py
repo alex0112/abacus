@@ -5,7 +5,9 @@ from uvsim import UVSim, Opcode
 
 class Window:
     def __init__(self, root):
+        self.simulation_started = False
         self.simulation_running = False
+        self.tab_reset = False
         self.uvsim_instances = {}
         self.root = root
         self.input_var = tk.StringVar()
@@ -55,6 +57,7 @@ class Window:
 
             self.tab_control.select(newTab)
             self.current_tab = self.tab_control.select()
+            self.uvsim = new_uvsim
         else:
             messagebox.showwarning("Simulation Running", "You cannot create tabs while simulation is running.")
     
@@ -62,14 +65,15 @@ class Window:
         if not self.simulation_running:
             current_tab_index = self.tab_control.index("current")
             
-            if len(self.uvsim_instances) <= 1:
+            if len(self.uvsim_instances) <= 1 and not self.tab_reset:
                 self.root.quit()
                 return
 
-            if current_tab_index == 0:
-                self.tab_control.select(1)
-            else:
-                self.tab_control.select(0)
+            if not self.tab_reset:
+                if current_tab_index == 0:
+                    self.tab_control.select(1)
+                else:
+                    self.tab_control.select(0)
             
             self.uvsim_instances.pop(current_tab_index)
 
@@ -160,6 +164,14 @@ class Window:
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").pack_forget()
         self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").pack()
         self.root.update_idletasks()  # Force the window to update its size
+
+    def reset_tab(self):
+        self.tab_reset = True
+        self.close_tab()
+        self.tab_setup()
+        self.current_tab = self.tab_control.select()
+        self.uvsim = self.uvsim_instances[self.tab_control.index("current")]
+        self.tab_reset = False
 
     def browse_files(self):
         file_path = filedialog.askopenfilename(initialdir="./bml_examples", title="Select a File",
@@ -296,9 +308,16 @@ class Window:
     def start_simulation(self):
         if not hasattr(self.tab_control.nametowidget(self.current_tab), 'edit_field'):
             self.edit_memory()  # Ensure edit_field is created
-        self.submit_memory_edit()
+            self.submit_memory_edit()
+        self.uvsim.cpu.current = 0
+        self.uvsim.cpu.halted = False
+        self.uvsim.cpu.acc = Opcode("0000")
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("start_simulation_button").config(state="disabled")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("output_panel").nametowidget("output_label").config(text="N/A") # Update the output display with the entire log
+        self.output_log = []
         self.simulation_running = True
+        self.simulation_started = True
         self.run_simulation_step()
 
     def run_simulation_step(self):
@@ -308,20 +327,35 @@ class Window:
 
     def halt_simulation(self):
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="normal")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("start_simulation_button").config(state="normal")
         self.simulation_running = False
-        self.uvsim.cpu.halted = True
+        self.simulation_started = False
+        self.uvsim.cpu.halt()
+        self.update_main_control_frame()
         self.uvsim.cpu.current = 0
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
         messagebox.showinfo("Simulation Halted", "The simulation has been halted.")
 
+    def pause(self):
+        if self.simulation_started == True:
+            self.simulation_running = not self.simulation_running
+            if self.simulation_running:
+                self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
+                self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("start_simulation_button").config(state="disabled")
+                self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("pause_button").config(text="Pause")
+            else:
+                self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="normal")
+                self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("start_simulation_button").config(state="normal")
+                self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("pause_button").config(text="Play")
+            self.run_simulation_step()
 
     def execute_step(self):
+        self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
         self.update_main_control_frame() #this is causing the program to refresh memory every step which makes it take longer to load
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
-        self.uvsim.cpu.step(self.uvsim.mem, self.uvsim.io_device)
         if self.uvsim.cpu.halted:
-            self.simulation_running = False
+            self.halt_simulation()
         
 
     def tk_reader(self):
@@ -405,7 +439,7 @@ class Window:
 
         start_simulation_button = tk.Button(program_control_panel, text="Start Simulation", command=self.start_simulation,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
-                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat", name="start_simulation_button")
         start_simulation_button.pack(pady=5)
 
         step_execution_button = tk.Button(program_control_panel, text="Step Execution", command=self.execute_step,
@@ -413,7 +447,12 @@ class Window:
                                           highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         step_execution_button.pack(pady=5)
 
-        halt_button = tk.Button(program_control_panel, text="Pause", command=self.halt_simulation,
+        pause_button = tk.Button(program_control_panel, text="Pause", command=self.pause,
+                                bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat", name="pause_button")
+        pause_button.pack(pady=5)
+
+        halt_button = tk.Button(program_control_panel, text="Halt", command=self.halt_simulation,
                                 bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                 highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         halt_button.pack(pady=5)
@@ -423,7 +462,7 @@ class Window:
                                      highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         help_button_main.pack(pady=5)
 
-        select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.start_program,
+        select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.reset_tab,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         select_test_file_button.pack(pady=5)
