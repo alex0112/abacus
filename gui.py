@@ -195,6 +195,11 @@ class Window:
             self.uvsim.cpu.current = 0
             self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
     
+    def confirm_select_test_file(self):
+        if messagebox.askokcancel("Confirm Reset", "Any unsaved modifications will be lost. Do you want to proceed?"):
+            self.reset_tab()
+            self.browse_files()
+
     def store_file(self):
         '''Store the contents of memory to a file using the file dialog.'''
         file_path = filedialog.asksaveasfilename(initialdir="./bml_examples", title="Save File",
@@ -236,7 +241,7 @@ class Window:
         for widget in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").winfo_children():
             widget.destroy()
             
-        self.tab_control.nametowidget(self.current_tab).edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
+        self.tab_control.nametowidget(self.current_tab).edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=8, height=19)
         self.tab_control.nametowidget(self.current_tab).edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
         
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").grid_columnconfigure(0, weight=1)
@@ -419,6 +424,11 @@ class Window:
                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         color_selection_button.pack(side=tk.RIGHT, padx=10, pady=20)
 
+        convert_test_file_button = tk.Button(buttons_frame, text="Convert Test File", command=self.convert_file,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        convert_test_file_button.pack(side=tk.RIGHT, padx=10, pady=20)
+
     def main_screen_frame(self, tab):
         main_control_frame = tk.Frame(tab, bg=self.primary_color, name="main_control_frame")
 
@@ -462,7 +472,7 @@ class Window:
                                      highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         help_button_main.pack(pady=5)
 
-        select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.reset_tab,
+        select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.confirm_select_test_file,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         select_test_file_button.pack(pady=5)
