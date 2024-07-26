@@ -262,6 +262,7 @@ class CPU:
 
     def halt(self):
         self.halted = True
+        self.current = 0
 
     def noop(self):
         pass
@@ -272,7 +273,7 @@ class CPU:
         """
         if not self.halted:
             if self.current not in Memory.ADDRESSABLE_SPACE:
-                self.halted = True
+                self.halt()
             else:
                 current_opcode = memory.read(self.current)
                 self.process(current_opcode, memory, io_device)
