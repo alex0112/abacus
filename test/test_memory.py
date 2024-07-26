@@ -61,7 +61,7 @@ def test_default_read():
 
     assert mem.read(42) == Opcode("+0000")
 
-def test_read():
+def test_read_single_digit_address():
     memory = Memory()
     memory.write(0, 1234)
     memory.write(1, 4567)
@@ -69,6 +69,33 @@ def test_read():
     assert memory.read(0) == 1234
     assert memory.read(1) == 4567
     assert memory.read(2) == 8910
+
+def test_read_double_digit_address():
+    memory = Memory()
+    memory.write(10, 1234)
+    memory.write(21, 4567)
+    memory.write(32, 8910)
+    assert memory.read(10) == 1234
+    assert memory.read(21) == 4567
+    assert memory.read(32) == 8910
+
+def test_read_triple_digit_address():
+    memory = Memory()
+    memory.write(100, 1234)
+    memory.write(110, 4567)
+    memory.write(150, 8910)
+    assert memory.read(10) == 1234
+    assert memory.read(21) == 4567
+    assert memory.read(32) == 8910
+
+def test_read_write_end():
+    memory = Memory()
+    memory.write(100, 1234)
+    memory.write(110, 4567)
+    memory.write(150, 8910)
+    assert memory.read(10) == 1234
+    assert memory.read(21) == 4567
+    assert memory.read(32) == 8910
 
 #########
 # Write #
@@ -155,11 +182,11 @@ def test_preview_near_begin_even():
 def test_preview_end_odd():
     mem = Memory()
 
-    mem.write(95, Opcode("+0095"))
-    mem.write(96, Opcode("+0096"))
-    mem.write(97, Opcode("+0097"))
-    mem.write(98, Opcode("+0098"))
-    mem.write(99, Opcode("+0099"))
+    mem.write(245, Opcode("+0095"))
+    mem.write(246, Opcode("+0096"))
+    mem.write(247, Opcode("+0097"))
+    mem.write(248, Opcode("+0098"))
+    mem.write(249, Opcode("+0099"))
 
     assert mem.preview(97, 5) == {95: Opcode("+0095"), 96: Opcode("+0096"), 97: Opcode("+0097"), 98: Opcode("+0098"), 99: Opcode("+0099")}
 
@@ -199,7 +226,6 @@ def test_preview_end_even():
 def test_memory_iteration():
     mem = Memory()
 
-
     mem.write(0, Opcode("+0000"))
     mem.write(1, Opcode("+0001"))
 
@@ -224,3 +250,6 @@ def test_memory_iteration():
     assert result[98] == Opcode("+0098")
     assert result[99] == Opcode("+0099")
     
+ #################################
+ # New Six Digit Opcode Behavior #
+ #################################
