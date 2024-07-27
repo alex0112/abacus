@@ -8,7 +8,7 @@ class CPU:
     An abstraction representing a CPU.
     This CPU contains an accumulator register and processes opcodes to perform various operations.
     """
-    def __init__(self, out_line=None):
+    def __init__(self):
         """
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.
@@ -262,6 +262,7 @@ class CPU:
 
     def halt(self):
         self.halted = True
+        self.current = 0
 
     def noop(self):
         pass
@@ -272,7 +273,7 @@ class CPU:
         """
         if not self.halted:
             if self.current not in Memory.ADDRESSABLE_SPACE:
-                self.halted = True
+                self.halt()
             else:
                 current_opcode = memory.read(self.current)
                 self.process(current_opcode, memory, io_device)
