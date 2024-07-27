@@ -43,7 +43,7 @@ class Window:
     def tab_setup(self):
         if not self.simulation_running:
             tab_index = len(self.uvsim_instances)
-            new_uvsim = UVSim(reader=self.tk_reader, writer=self.tk_writer, out_line=self.tk_out_line)
+            new_uvsim = UVSim(reader=self.tk_reader, writer=self.tk_writer)
             self.uvsim_instances[tab_index] = new_uvsim
 
             newTab = ttk.Frame(self.tab_control)
@@ -342,6 +342,7 @@ class Window:
         self.update_main_control_frame() #this is causing the program to refresh memory every step which makes it take longer to load
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(state="disabled")
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
+        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("control_panel").nametowidget("current_instruction_label").config(text=f"[ {str(self.uvsim.cpu.acc)} ]") 
         if self.uvsim.cpu.halted:
             self.halt_simulation()
         
@@ -362,11 +363,6 @@ class Window:
     def tk_writer(self, text):
         self.output_log.append(str(text))  # Append the new output to the log
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("output_panel").nametowidget("output_label").config(text="\n".join(self.output_log)) # Update the output display with the entire log
-
-
-    def tk_out_line(self, text):
-        self.output_log.append(str(text)) # Append the new output to the log
-        self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("control_panel").nametowidget("current_instruction_label").config(text="\n".join(self.output_log))  # Update the output display with the entire log
 
     def title_screen_frame(self, tab, event=None):
         title_frame = tk.Frame(tab, bg=self.primary_color, name="title_frame")
@@ -485,7 +481,7 @@ class Window:
         memory_inner_frame = tk.Frame(memory_canvas, bg=self.primary_color, name="memory_inner_frame")
         memory_canvas.create_window((0, 0), window=memory_inner_frame)
 
-        control_panel = tk.LabelFrame(top_frame, text="Control Panel", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n', name="control_panel")
+        control_panel = tk.LabelFrame(top_frame, text="Register", bg=self.primary_color, fg=self.off_color, font=("Helvetica", 12), labelanchor='n', name="control_panel")
         control_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=10, pady=10)
 
         current_instruction_label = tk.Label(control_panel, text="[ +0000 ]", font=("Courier", 14),
