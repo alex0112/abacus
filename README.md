@@ -92,7 +92,7 @@ To load a file, select the `Browse Files` button. You will then be presented wit
 
 ![image](./assets/images/updated-file-selection-frame.png)
 
-Once you have selected your file, open it and click the `Load File` button:
+Once you have selected your file, open it and click the `Load File` button.
 
 ### Main Control Frame
 After selecting the `Load File` button, you will be presented with the Main Control Frame:
