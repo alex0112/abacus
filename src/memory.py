@@ -4,7 +4,7 @@ class Memory:
     """
     Class to represent the memory of the simulator.
     """
-    ADDRESSABLE_SPACE = range(0, 100)
+    ADDRESSABLE_SPACE = range(0, 250)
     LAST_ADDRESS      = ADDRESSABLE_SPACE.stop - 1
 
     def __init__(self, arr=[]):

@@ -35,7 +35,7 @@ def test_init():
 ####################
 def test_overflow(cpu):
     with pytest.raises(IndexError):
-        cpu.current = 100  # Upper Bound is 99
+        cpu.current = 250  # Upper Bound is 249
 
 def test_underflow(cpu):
     with pytest.raises(IndexError):
@@ -60,10 +60,11 @@ def test_halt_from_instruction(cpu, memory, io_device):
 ########
 
 def test_read_good_word(cpu, memory, io_device):
-    io_device.read = lambda: "1234"
+    io_device.read = lambda: "7777"
     op = Opcode("1010")
     cpu.process(op, memory, io_device)
-    assert memory.read(10) == 1234 
+    print(memory.read(10))
+    assert memory.read(10) == 7777 
 
 def test_read_bad_word(cpu, memory, io_device):
     with pytest.raises(ValueError):
@@ -83,7 +84,7 @@ def test_write(cpu, memory, io_device):
 
 def test_write_bad_word(cpu, memory, io_device):
     with pytest.raises(ValueError):
-        op = Opcode("11100")
+        op = Opcode("11100000000000")
         cpu.process(op, memory, io_device)
 
 ########
@@ -121,11 +122,11 @@ def test_store_bad_word(cpu, memory):
 #######
 
 def test_add(cpu, memory, io_device):
-    cpu.acc = Opcode("1234")
-    memory.write(40, Opcode("1000"))
-    op = Opcode("3040")
+    cpu.acc = Opcode("001234")
+    memory.write(40, Opcode("001000"))
+    op = Opcode("030040")
     cpu.process(op, memory, None)
-    assert cpu.acc == Opcode("+2234")
+    assert cpu.acc == Opcode("+002234")
 
 def test_add_bad_word(cpu, memory, io_device):
     with pytest.raises(ValueError):

@@ -205,7 +205,7 @@ class CPU:
             address (int): The memory address from which the data will be subtracted from the accumulator.
         """
         operand = int(str(memory.read(address)))
-        self.acc = Opcode(f"{int(str(self.acc)) - operand:+05d}")
+        self.acc = Opcode(f"{int(str(self.acc)) - operand:+07d}")
 
     def multiply(self, memory, address):
         """
