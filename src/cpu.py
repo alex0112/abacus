@@ -8,7 +8,7 @@ class CPU:
     An abstraction representing a CPU.
     This CPU contains an accumulator register and processes opcodes to perform various operations.
     """
-    def __init__(self, out_line=None):
+    def __init__(self):
         """
         Initialize the CPU with an accumulator set to 0000.
         The accumulator is used for arithmetic and data manipulation operations.

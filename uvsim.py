@@ -9,13 +9,13 @@ class UVSim:
     """
     An abstraction representing the UVSim virtual machine. It represents the current state of the virtual machine and creates its memory, register, and CPU.
     """
-    def __init__(self, reader=None, writer=None, out_line=None):
+    def __init__(self, reader=None, writer=None):
         """
         Initialize and create a UVSim VM
         """
         self.__memory = Memory()
         self.__io  = IODevice(reader, writer)
-        self.__cpu = CPU(out_line)
+        self.__cpu = CPU()
 
     @property
     def mem(self):
