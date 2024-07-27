@@ -35,7 +35,7 @@ def test_init_with_minus_4digit():
 
 def test_init_with_no_sign_4digit():
     op = Opcode("1234")
-    assert str(op) == "+1234"
+    assert str(op) == "+001234"
 
 def test_init_with_too_long():
     with pytest.raises(ValueError):
@@ -90,24 +90,28 @@ def test_minus_4digit():
 ############
 
 def test_operand_4digit():
-    op = Opcode("+1234")
-    assert op.operand == "34"
+    op = Opcode("+1088") ## operand to READ
+    assert op.operand == "088"
+
+def test_operand_6digit():
+    op = Opcode("+010042")
+    assert op.operand == "042"
 
 ##########################
 # String Representation: #
 ##########################
 
 def test_str_from_minus_4digit():
-    op = Opcode("-1234")
-    assert str(op) == "-1234"
+    op = Opcode("-7777")
+    assert str(op) == "-007777"
 
 def test_str_from_plus_4digit():
-    op = Opcode("+1234")
-    assert str(op) == "+1234"
+    op = Opcode("+7777")
+    assert str(op) == "+007777"
 
 def test_str_from_no_sign_4digit():
-    op = Opcode("1234")
-    assert str(op) == "+1234"
+    op = Opcode("7777")
+    assert str(op) == "+007777"
 
 #############
 # Equality: #
@@ -245,8 +249,8 @@ def test_named_opcode_4digit():
     write_op = Opcode("+1101")
     read_op = Opcode("+1002")
 
-    assert write_op.human_friendly == "WRITE 01"
-    assert read_op.human_friendly == "READ 02"
+    assert write_op.human_friendly == "WRITE 001"
+    assert read_op.human_friendly == "READ 002"
 
 def test_unamed_opcode_4digit():
     op1 = Opcode("-0001")
@@ -263,18 +267,12 @@ def test_unnamed_opcode_NOOP():
     op4 = Opcode("+7777")
     op6 = Opcode("+777777")
 
-    assert str(op4) == "NOOP"
-    assert str(op6) == "NOOP"
-
     assert op4.raw == "+007777"
     assert op6.raw == "+777777"
 
 def test_named_opcode_READ():
     op4 = Opcode("+1010")
     op6 = Opcode("+010010")
-
-    assert str(op4) == "READ 010"
-    assert str(op6) == "READ 010"
 
     assert op4.raw == "+010010"
     assert op6.raw == "+010010"

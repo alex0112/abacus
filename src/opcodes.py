@@ -2,6 +2,30 @@ class Opcode:
     """
     Class to represent an opcode in the simulator.
     """
+
+    __op_list = {
+            10: "READ", 11: "WRITE", 20: "LOAD", 21: "STORE",
+            30: "ADD", 31: "SUBTRACT", 32: "DIVIDE", 33: "MULTIPLY",
+            40: "BRANCH", 41: "BRANCHNEG", 42: "BRANCHZERO", 43: "HALT"
+        }
+
+    @staticmethod
+    def __4_to_6(raw):
+        if len(raw) == 6 or len(raw) == 7:
+            return raw
+
+        sign = raw[0]
+        operation = raw[1:3]
+        operand = raw[3:]
+
+        if Opcode.__op_list.get(int(operation)) is None:
+            return f"{sign}00{operation}{operand}"
+    
+        elif Opcode.__op_list.get(int(operation)):
+            return f"{sign}0{operation}0{operand}"
+        else:
+            raise ValueError(f"Wasn't able to convert 4-digit(?) {raw} into 6-digit format.")
+
     def __init__(self, raw):
         """
         Initialize the Opcode with a raw string value.
@@ -13,7 +37,7 @@ class Opcode:
             ValueError: If the raw value is invalid.
         """
         if isinstance(raw, int):
-            raw = f"{raw:+05d}"
+            raw = f"{raw:+07d}"
 
         raw = raw.strip()
 
@@ -21,40 +45,39 @@ class Opcode:
             raise ValueError("Opcode cannot be empty")
         if raw[0] not in ['-', '+']:
             raw = '+' + raw
-        if not raw[1:].isdigit() or len(raw[1:]) != 4:
-            raise ValueError(f"Could not make opcode from {raw}. Opcode must be 4 digits")
+
+        if len(raw) == 4 or len(raw) == 5:
+            raw = Opcode.__4_to_6(raw)
+        
+        if not raw[1:].isdigit() or len(raw[1:]) != 6:
+            raise ValueError(f"Could not make opcode from {raw}. Opcode must be either 4 or 6 digits")
 
         try:
             self.__numeric = int(raw)
         except ValueError:
-            raise ValueError(f"Could not make opcode from {raw}. Opcode must be 4 digits")
+            raise ValueError(f"Could not make opcode from {raw}. Opcode must be either 4 or 6 digits")
 
         self.__raw = raw
         self.__sign = ""
-        self.__op_list = {
-            10: "READ", 11: "WRITE", 20: "LOAD", 21: "STORE",
-            30: "ADD", 31: "SUBTRACT", 32: "DIVIDE", 33: "MULTIPLY",
-            40: "BRANCH", 41: "BRANCHNEG", 42: "BRANCHZERO", 43: "HALT"
-        }
-
+        
     @property
     def name(self):
         """
         Returns the name of the operation corresponding to the opcode.
         """
-        if self.__raw[0].isdigit():
+        if self.raw[0].isdigit():
             self.__sign = "+"
-            new_raw = "+" + self.__raw
+            self.raw = "+" + self.raw
             self.__raw = new_raw
-        operation = int(self.__raw[1:3])
-        return self.__op_list.get(operation, "NOOP")
+        operation = int(self.raw[1:4])
+        return Opcode.__op_list.get(operation, "NOOP")
 
     @property
     def sign(self):
         """
         Returns the sign of the opcode.
         """
-        self.__sign = self.__raw[0]
+        self.__sign = self.raw[0]
         return self.__sign
 
     @property
@@ -62,7 +85,8 @@ class Opcode:
         """
         Returns the operand of the opcode.
         """
-        return self.__raw[3:]
+        print(f"raw is: {self.raw}")
+        return self.raw[4:]
 
     @property
     def raw(self):
@@ -95,7 +119,7 @@ class Opcode:
         """
         raw_string = f"{int(raw_integer):+05d}"
 
-        if raw_integer > 9999 or raw_integer < -9999:
+        if raw_integer > 999999 or raw_integer < -999999:
             truncated  = raw_string[-4:] ## Grab the last four digits
             sign       = raw_string[0]
             overflowed = int(f"{sign}{truncated}")
