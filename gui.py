@@ -183,6 +183,7 @@ class Window:
         file_path = self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").nametowidget("file_entry").get()
         if file_path:
             self.uvsim.load(file_path)
+
             self.tab_control.nametowidget(self.current_tab).nametowidget("title_frame").pack_forget()
             self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").pack(padx=20, pady=20)
             self.tab_control.tab(self.tab_control.index(self.tab_control.select()), text=file_path.split('/')[-1])
@@ -194,14 +195,27 @@ class Window:
             self.uvsim.cpu.current = 0
             self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").nametowidget("current_instruction_panel").nametowidget("current_instruction_display").config(text=f"[ {str(self.uvsim.cpu.current)} ]")
     
+    def confirm_select_test_file(self):
+        if messagebox.askokcancel("Confirm Reset", "Any unsaved modifications will be lost. Do you want to proceed?"):
+            self.reset_tab()
+            self.browse_files()
+
     def store_file(self):
         '''Store the contents of memory to a file using the file dialog.'''
         file_path = filedialog.asksaveasfilename(initialdir="./bml_examples", title="Save File",
                                                     filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
         self.uvsim.store(file_path)
 
+    def convert_file(self):
+        #open window to select file
+        file_path = filedialog.askopenfilename(initialdir="./bml_examples", title="Select a File to Convert",
+                                                  filetypes=(("Text files", "*.txt"), ("all files", "*.*")))
+        if file_path:
+            self.uvsim.convert(file_path)
+
 
     def submit_memory_edit(self):
+        '''Submit the memory edit to the memory.'''
         opcode_list = []
         text_content = self.tab_control.nametowidget(self.current_tab).edit_field.get("1.0", tk.END).strip().split("\n")
         try:
@@ -221,12 +235,13 @@ class Window:
 
 
     def edit_memory(self):
+        '''Open the advanced editor for memory editing.'''
         content = self.uvsim.cpu.gui_preview_state(self.uvsim.mem)
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("program_control_panel").nametowidget("advanced_editor_button").config(text="Submit Changes", command=self.submit_memory_edit)
         for widget in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").winfo_children():
             widget.destroy()
             
-        self.tab_control.nametowidget(self.current_tab).edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=6, height=16)
+        self.tab_control.nametowidget(self.current_tab).edit_field = tk.Text(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), bg=self.primary_color, fg=self.off_color, width=8, height=19)
         self.tab_control.nametowidget(self.current_tab).edit_field.grid(row=0, column=0, padx=10, pady=4, sticky="nsew")
         
         self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame").grid_columnconfigure(0, weight=1)
@@ -242,6 +257,7 @@ class Window:
 
 
     def modify_memory(self, slot, entry):
+            '''Modify the memory slot with the given entry.'''
             try:
                 entry = int(entry)
                 self.uvsim.mem.write(slot[0], entry)
@@ -251,7 +267,7 @@ class Window:
                 messagebox.showerror("Error", f"Please enter a valid integer value.\n{e}")
                 self.update_main_control_frame()
 
-    def on_click(self, slot, label):
+    def on_click_opcode(self, slot, label):
         label.forget()
         entry = tk.Entry(self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("top_frame").nametowidget("memory_display_frame").nametowidget("memory_canvas").nametowidget("memory_inner_frame"), font=("Courier", 10), width=5, bg=self.primary_color, fg=self.off_color)
         entry.insert(0, slot[1])
@@ -259,6 +275,7 @@ class Window:
         entry.grid(row=slot[0], column=1, padx=10, pady=5)
 
     def update_main_control_frame(self):
+
         
         # for child in self.tab_control.nametowidget(self.current_tab).nametowidget("main_control_frame").nametowidget("bottom_frame").winfo_children():
         #     print(child.winfo_name())
@@ -403,6 +420,11 @@ class Window:
                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         color_selection_button.pack(side=tk.RIGHT, padx=10, pady=20)
 
+        convert_test_file_button = tk.Button(buttons_frame, text="Convert Test File", command=self.convert_file,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        convert_test_file_button.pack(side=tk.RIGHT, padx=10, pady=20)
+
     def main_screen_frame(self, tab):
         main_control_frame = tk.Frame(tab, bg=self.primary_color, name="main_control_frame")
 
@@ -446,7 +468,7 @@ class Window:
                                      highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         help_button_main.pack(pady=5)
 
-        select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.reset_tab,
+        select_test_file_button = tk.Button(program_control_panel, text="Select Test File", command=self.confirm_select_test_file,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         select_test_file_button.pack(pady=5)
@@ -455,6 +477,11 @@ class Window:
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
                                             highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
         save_test_file_button.pack(pady=5)
+
+        convert_test_file_button = tk.Button(program_control_panel, text="Convert Test File", command=self.convert_file,
+                                            bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
+                                            highlightcolor=self.primary_color, activebackground=self.primary_color, borderwidth=0, relief="flat")
+        convert_test_file_button.pack(pady=5)
 
         advanced_editor_button = tk.Button(program_control_panel, text="Advanced Edit", command=self.edit_memory,
                                             bg=self.off_color, fg=self.primary_color, highlightbackground=self.primary_color,
