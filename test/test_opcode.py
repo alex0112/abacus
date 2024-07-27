@@ -206,40 +206,40 @@ def test_opcode_div_with_remainder_4digit():
 # Overflow: #
 #############
 
-def test_overflow_addition_4digit():
-    op1 = Opcode("+9999")
-    op2 = Opcode("+0002")
+def test_overflow_addition():
+    op1 = Opcode("+999999")
+    op2 = Opcode("+000002")
 
     result = op1 + op2
 
-    assert result == Opcode("+0001")
+    assert result == Opcode("+000001")
 
-def test_underflow_subtraction_4digit():
-    op1 = Opcode("-9999")
-    op2 = Opcode("+0002")
+def test_underflow_subtraction():
+    op1 = Opcode("-999999")
+    op2 = Opcode("+000002")
 
     result = op1 - op2
 
     print(f"result: {result}")
-    assert result == Opcode("-0001")
+    assert result == Opcode("-000001")
 
 def test_overflow_product_4digit():
-    op1 = Opcode("+9999")
-    op2 = Opcode("+0010")
+    op1 = Opcode("+999999")
+    op2 = Opcode("+000010")
 
     result = op1 * op2
 
     print(f"{op1} * {op2} == {result.numeric}")
-    assert result == Opcode("+9990")
+    assert result == Opcode("+999990")
 
 def test_underflow_product_4digit():
-    op1 = Opcode("-9999")
-    op2 = Opcode("+0002")
+    op1 = Opcode("-999999")
+    op2 = Opcode("+000002")
 
     result = op1 * op2
     print(f"{op1} * {op2} == {result.numeric}")
 
-    assert result == Opcode("-9998")
+    assert result == Opcode("-999998")
 
 ##################
 # Human Readable #

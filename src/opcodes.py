@@ -117,16 +117,16 @@ class Opcode:
         The current specification is:
         "Truncate overflows (so same sign, just drop the extra digits, keep the last four)"
         """
-        raw_string = f"{int(raw_integer):+05d}"
+        raw_string = f"{int(raw_integer):+07d}"
 
         if raw_integer > 999999 or raw_integer < -999999:
-            truncated  = raw_string[-4:] ## Grab the last four digits
+            truncated  = raw_string[-6:] ## Grab the last six digits
             sign       = raw_string[0]
             overflowed = int(f"{sign}{truncated}")
 
-            print(f"warning: overflowing {raw_string} to {overflowed:+05d}")
+            print(f"warning: overflowing {raw_string} to {overflowed:+07d}")
             
-            return Opcode(f"{overflowed:+05d}")
+            return Opcode(f"{overflowed:+07d}")
         else:
             return Opcode(raw_string)
             
