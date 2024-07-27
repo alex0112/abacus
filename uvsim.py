@@ -84,48 +84,40 @@ class UVSim:
         op_list = [10, 11, 20, 21, 30, 31, 32, 33, 40, 41, 42, 43]
         new_list = []
         file_content = []
+        def detect_sign(line):
+            sign = "+"
+            if line[0] == "-":
+                line = line[1:]
+                sign = "-"
+            elif line[0] == "+":
+                line = line[1:]
+            return line, sign
+        def write_file(filename, new_list):
+            with open(filename, 'w') as file:
+                for line in range(len(new_list)-1):
+                    file.write(new_list[line])
+                file.write(new_list[-1].strip())
+                print('Program converted successfully')
+        #check if file was provided
         if filename == "":
             print("Filename not provided")
             return
-        try:
-            with open(filename, 'r') as file:
-                file_content = file.readlines()
-                file = file_content[:]
-                for line in file:
-                    sign_flag = False
-                    current = line.strip()
-                    #check for line structure
-                    if current[0] == "+" or current[0] == "-":
-                        sign_flag = True
-                        current = current[1:]
-                    if len(current) <= 3:
-                        for i in range(4-len(current)):
-                            current = "0" + current
-                        print("Some values where prepended with 0s")
-                    elif len(current) > 4:
-                        raise Exception("File contains invalid opcodes")
-                    if int(current[:2]) in op_list and sign_flag:
-                        current = f"{line[0]}0{current[0:2]}0{current[2:]}\n" #add a 0 to the opcode and 0 to the address
-                    elif int(current[:2]) in op_list and not sign_flag:
-                        current = f"+0{current[0:2]}0{current[2:]}\n"
-                    elif sign_flag:
-                        current = f"{line[0]}00{current}\n" #add 00 to the address if is just value
-                    else:
-                        current = f"+00{current}\n"
-                    new_list.append(current)
-            new_list[-1] = new_list[-1].strip()
-            #save in file
-            with open(filename, 'w') as file:
-                for line in new_list:
-                    file.write(line)
-                print('Program converted successfully')
-        except Exception as e:
-            with open(filename, "w") as file:
-                for line in file_content:
-                    file.write(line)
-                print(f'Error converting the program: {e}')
-                    
-
-        
-
-
+        file_content = []
+        with open(filename, 'r') as file:
+            file_content = file.readlines()
+        for line in file_content:
+            current = line.strip()
+            current, sign = detect_sign(current)
+            #Prefills with 0s if any code is less than 4 digits
+            if len(current) <= 3:
+                for i in range(4-len(current)):
+                    current = "0" + current
+            #raises error if incopatible code is found
+            elif len(current) > 4:
+                raise Exception("File contains invalid opcodes")
+            if int(current[:2]) in op_list:
+                current = f"{sign}0{current[0:2]}0{current[2:]}\n"
+            else:
+                current = f"{sign}00{current}\n"
+            new_list.append(current)
+        write_file(filename, new_list)
